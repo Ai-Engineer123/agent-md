@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Executive Operations AI Agent — Daily 10:30 AM Routine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css?v=20261011_v14">
+</head>
+<body class="light-theme">
+  <div class="app-container">
+    <!-- Top Executive Header -->
+    <header class="executive-header">
+      <div class="brand-group">
+        <div class="agent-avatar">
+          <div class="pulse-ring"></div>
+          <span class="avatar-icon">⚡</span>
+        </div>
+        <div class="brand-text">
+          <div class="badge-row">
+            <span class="badge badge-glow">AUTONOMOUS AGENT ACTIVE</span>
+            <span class="badge badge-schedule" id="schedule-badge">DAILY 10:30 AM ROUTINE</span>
+          </div>
+          <h1>Executive Daily Audit Agent</h1>
+          <p class="subtitle">Polyglot Architecture • Continuous Monitoring • Zero Data Loss JSONL Logging</p>
+        </div>
+      </div>
+
+      <div class="header-status-panel">
+        <button id="btn-theme-toggle" class="btn-theme-toggle" title="Toggle Light / Dark Mode" aria-label="Toggle Theme">
+          <span class="theme-icon" id="theme-icon">🌙</span>
+          <span class="theme-text" id="theme-text">Dark Mode</span>
+        </button>
+        <div class="time-card">
+          <span class="time-label">LIVE SYSTEM TIME (IST)</span>
+          <span class="time-value" id="live-clock">--:--:--</span>
+          <span class="date-value" id="live-date">Loading date...</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Navigation Bar -->
+    <nav class="nav-bar-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding: 12px 24px; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); box-shadow: var(--shadow-elevated);">
+      <div class="nav-links" style="display: flex; gap: 16px;">
+        <a href="/" class="nav-link" style="color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.9rem; padding: 8px 16px; border-radius: var(--radius-sm); transition: all 0.2s ease;">🏠 Home Portal</a>
+        <a href="/checklist" class="nav-link active" style="color: var(--accent-cyan); text-decoration: none; font-weight: 700; font-size: 0.9rem; padding: 8px 16px; border-radius: var(--radius-sm); background: rgba(2, 132, 199, 0.12);">📋 Daily Checklist</a>
+        <a href="/audit" class="nav-link" style="color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.9rem; padding: 8px 16px; border-radius: var(--radius-sm); transition: all 0.2s ease;">🧠 Agent AI Summary</a>
+        <a href="/calendar" class="nav-link" style="color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.9rem; padding: 8px 16px; border-radius: var(--radius-sm); transition: all 0.2s ease;">📅 Operations Calendar</a>
+        <a href="/meetings" class="nav-link" style="color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.9rem; padding: 8px 16px; border-radius: var(--radius-sm); transition: all 0.2s ease;">🤝 Executive Meetings</a>
+      </div>
+    </nav>
+
+    <!-- Main Command Bar & Progress Summary -->
+    <section class="command-bar">
+      <div class="progress-box">
+        <div class="progress-text-row">
+          <div>
+            <h3 class="progress-title">Today's Audit Routine Progress</h3>
+            <span class="progress-count" id="progress-text">0 / 8 Tasks Acknowledged</span>
+          </div>
+          <div class="percentage-badge" id="percentage-badge">0%</div>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <div class="action-buttons">
+        <button id="btn-trigger-routine" class="btn btn-primary" title="Trigger 10:30 AM Routine immediately for testing">
+          <span class="btn-icon">⚡</span>
+          <span>Trigger 10:30 AM Routine Now</span>
+        </button>
+        <button id="btn-toggle-logs" class="btn btn-secondary" title="View live daily JSONL logs">
+          <span class="btn-icon">📄</span>
+          <span>View JSONL Logs</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- 8 Daily Checklist Cards Container -->
+    <main class="checklist-grid" id="checklist-container">
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Initializing agent checklist & scheduler...</p>
+      </div>
+    </main>
+
+    <!-- Slide-out Drawer for JSONL Audit Stream -->
+    <aside class="logs-drawer" id="logs-drawer">
+      <div class="drawer-header">
+        <div>
+          <h3>Daily JSONL Audit Log</h3>
+          <span class="drawer-file-badge" id="log-filename-badge">logs/today.jsonl</span>
+        </div>
+        <button id="btn-close-logs" class="btn-icon-close">&times;</button>
+      </div>
+      <div class="drawer-body">
+        <div class="log-controls">
+          <button id="btn-refresh-logs" class="btn btn-small">↻ Refresh Logs</button>
+          <span class="entry-count" id="log-entry-count">0 entries recorded</span>
+        </div>
+        <div class="logs-stream" id="logs-stream">
+          <p class="empty-hint">No logs recorded for today yet.</p>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Floating Toast Notification -->
+    <div id="toast" class="toast">Action Saved Successfully</div>
+  </div>
+
+  <script src="/static/app.js?v=20261009_v2"></script>
+</body>
+</html>

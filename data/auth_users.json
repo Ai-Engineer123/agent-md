@@ -1,0 +1,32 @@
+[
+  {
+    "username": "md",
+    "password": "md123",
+    "name": "Managing Director",
+    "role": "Executive Office",
+    "designation": "Executive Head & Managing Director",
+    "initials": "MD",
+    "badgeColor": "#ff914d",
+    "theme": "executive"
+  },
+  {
+    "username": "admin",
+    "password": "admin123",
+    "name": "Executive Assistant",
+    "role": "Operations Desk",
+    "designation": "Operations & Executive Assistant (EA)",
+    "initials": "EA",
+    "badgeColor": "#3B82F6",
+    "theme": "admin"
+  },
+  {
+    "username": "ea",
+    "password": "ea123",
+    "name": "Executive Assistant",
+    "role": "Operations Desk",
+    "designation": "Operations & Executive Assistant (EA)",
+    "initials": "EA",
+    "badgeColor": "#3B82F6",
+    "theme": "admin"
+  }
+]

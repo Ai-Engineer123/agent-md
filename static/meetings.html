@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Executive Meetings Desk — Master Schedule & Directives</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css?v=20261011_v14">
+  <link rel="stylesheet" href="/static/vendor/flatpickr.min.css">
+  <style>
+    /* ==========================================================================
+       EXECUTIVE MEETINGS DESK — TABLE VIEW & SLEEK DROPDOWN STYLING
+       ========================================================================== */
+
+    /* Navigation Bar */
+    .nav-bar-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding: 14px 24px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-elevated);
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .nav-links {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-link.active, .nav-link:hover {
+      color: var(--accent-cyan);
+      background: #e0f2fe;
+    }
+
+    /* Week & Toolbar Card */
+    .command-toolbar-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-elevated);
+      padding: 18px 24px;
+      margin-bottom: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .toolbar-top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .week-nav-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .btn-nav-week {
+      background: var(--bg-core);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-heading);
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      font-weight: 700;
+      font-size: 0.84rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-nav-week:hover {
+      background: #e0f2fe;
+      color: #0284c7;
+      border-color: #38bdf8;
+    }
+    .week-title-badge {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--text-heading);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toolbar-actions-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* Sleek Custom Select Dropdown Styling */
+    .select-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .select-label {
+      font-size: 0.76rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .custom-select {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-color: var(--bg-core);
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230284c7' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      background-size: 14px 14px;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-heading);
+      padding: 7px 32px 7px 12px;
+      border-radius: var(--radius-sm);
+      font-family: inherit;
+      font-size: 0.84rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+    .custom-select:hover {
+      border-color: #0284c7;
+    }
+    .custom-select:focus {
+      outline: none;
+      border-color: #0284c7;
+      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.2);
+    }
+
+    /* ==========================================================================
+       EXECUTIVE CUSTOM DROPDOWN LIST SYSTEM
+       ========================================================================== */
+    .custom-dropdown-wrap {
+      position: relative;
+      display: inline-block;
+    }
+    .custom-dropdown-trigger {
+      display: inline-flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: var(--bg-core);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-heading);
+      padding: 7px 14px;
+      border-radius: var(--radius-sm);
+      font-family: inherit;
+      font-size: 0.84rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      white-space: nowrap;
+      min-width: 145px;
+      user-select: none;
+    }
+    .custom-dropdown-trigger:hover,
+    .custom-dropdown-wrap.open .custom-dropdown-trigger {
+      border-color: #0284c7;
+      background: #f0fdf4;
+      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+    }
+    body:not(.light-theme) .custom-dropdown-trigger:hover,
+    body:not(.light-theme) .custom-dropdown-wrap.open .custom-dropdown-trigger {
+      background: rgba(2, 132, 199, 0.15);
+      border-color: #38bdf8;
+    }
+    .custom-dropdown-trigger .dropdown-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .custom-dropdown-trigger .dropdown-caret {
+      font-size: 0.72rem;
+      color: #0284c7;
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .custom-dropdown-wrap.open .dropdown-caret {
+      transform: rotate(180deg);
+    }
+
+    .custom-dropdown-menu {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      min-width: 100%;
+      width: max-content;
+      max-width: 320px;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      box-shadow: 0 12px 28px -4px rgba(15, 23, 42, 0.18), 0 4px 12px -2px rgba(15, 23, 42, 0.08);
+      padding: 6px;
+      z-index: 1000;
+      opacity: 0;
+      transform: translateY(-8px) scale(0.97);
+      pointer-events: none;
+      transition: opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1), transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+      max-height: 280px;
+      overflow-y: auto;
+    }
+    body:not(.light-theme) .custom-dropdown-menu {
+      background: #1e293b;
+      border-color: rgba(255, 255, 255, 0.12);
+      box-shadow: 0 14px 35px rgba(0, 0, 0, 0.65);
+    }
+    .custom-dropdown-wrap.open .custom-dropdown-menu {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+    }
+
+    .custom-dropdown-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.83rem;
+      font-weight: 600;
+      color: var(--text-heading);
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+      white-space: nowrap;
+    }
+    .custom-dropdown-item:hover {
+      background: #e0f2fe;
+      color: #0284c7;
+      transform: translateX(2px);
+    }
+    body:not(.light-theme) .custom-dropdown-item:hover {
+      background: rgba(2, 132, 199, 0.22);
+      color: #38bdf8;
+    }
+    .custom-dropdown-item.selected {
+      background: #0284c7;
+      color: #ffffff;
+      font-weight: 700;
+    }
+    .custom-dropdown-item.selected:hover {
+      background: #0369a1;
+      color: #ffffff;
+    }
+    .custom-dropdown-item .check-icon {
+      font-size: 0.8rem;
+      opacity: 0;
+    }
+    .custom-dropdown-item.selected .check-icon {
+      opacity: 1;
+    }
+
+    /* ==========================================================================
+       EXECUTIVE CALENDAR PICKER OVERRIDES (FLATPICKR CSS)
+       ========================================================================== */
+    .flatpickr-calendar {
+      background: #ffffff !important;
+      border: 1px solid #cbd5e1 !important;
+      border-radius: 14px !important;
+      box-shadow: 0 16px 36px -4px rgba(15, 23, 42, 0.2), 0 6px 14px -2px rgba(15, 23, 42, 0.08) !important;
+      font-family: 'Outfit', sans-serif !important;
+      padding: 10px 12px 14px 12px !important;
+      width: 310px !important;
+      z-index: 999999 !important;
+    }
+    body:not(.light-theme) .flatpickr-calendar {
+      background: #1e293b !important;
+      border-color: rgba(255, 255, 255, 0.12) !important;
+      box-shadow: 0 20px 42px rgba(0, 0, 0, 0.65) !important;
+    }
+    .flatpickr-calendar:before, .flatpickr-calendar:after {
+      display: none !important;
+    }
+    .flatpickr-months {
+      margin-bottom: 8px !important;
+      align-items: center !important;
+      padding-top: 4px !important;
+    }
+    .flatpickr-months .flatpickr-month {
+      color: var(--text-heading) !important;
+      fill: var(--text-heading) !important;
+      height: 38px !important;
+    }
+    .flatpickr-current-month {
+      font-size: 1rem !important;
+      font-weight: 800 !important;
+      padding-top: 4px !important;
+      color: var(--text-heading) !important;
+    }
+    .flatpickr-current-month .cur-month {
+      font-weight: 800 !important;
+      color: var(--text-heading) !important;
+    }
+    .flatpickr-current-month .numInputWrapper {
+      font-weight: 800 !important;
+      color: var(--text-heading) !important;
+    }
+    .flatpickr-months .flatpickr-prev-month,
+    .flatpickr-months .flatpickr-next-month {
+      padding: 8px !important;
+      border-radius: 6px !important;
+      transition: all 0.15s ease !important;
+      fill: #0284c7 !important;
+      color: #0284c7 !important;
+    }
+    .flatpickr-months .flatpickr-prev-month:hover,
+    .flatpickr-months .flatpickr-next-month:hover {
+      background: #e0f2fe !important;
+      fill: #0369a1 !important;
+    }
+    body:not(.light-theme) .flatpickr-months .flatpickr-prev-month:hover,
+    body:not(.light-theme) .flatpickr-months .flatpickr-next-month:hover {
+      background: rgba(2, 132, 199, 0.25) !important;
+      fill: #38bdf8 !important;
+    }
+    span.flatpickr-weekday {
+      color: var(--text-muted) !important;
+      font-weight: 800 !important;
+      font-size: 0.74rem !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.05em !important;
+    }
+    .flatpickr-day {
+      border-radius: 8px !important;
+      font-weight: 600 !important;
+      font-size: 0.86rem !important;
+      color: var(--text-heading) !important;
+      height: 36px !important;
+      line-height: 36px !important;
+      margin: 1px !important;
+      transition: all 0.15s ease !important;
+    }
+    .flatpickr-day:hover {
+      background: #e0f2fe !important;
+      color: #0284c7 !important;
+      border-color: transparent !important;
+    }
+    body:not(.light-theme) .flatpickr-day:hover {
+      background: rgba(2, 132, 199, 0.25) !important;
+      color: #38bdf8 !important;
+    }
+    .flatpickr-day.today {
+      border-color: #0284c7 !important;
+      color: #0284c7 !important;
+      font-weight: 800 !important;
+    }
+    .flatpickr-day.selected,
+    .flatpickr-day.startRange,
+    .flatpickr-day.endRange {
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
+      border-color: #0284c7 !important;
+      color: #ffffff !important;
+      font-weight: 800 !important;
+      box-shadow: 0 4px 10px rgba(2, 132, 199, 0.35) !important;
+    }
+    .flatpickr-day.prevMonthDay,
+    .flatpickr-day.nextMonthDay {
+      color: #94a3b8 !important;
+      opacity: 0.55 !important;
+    }
+    .flatpickr-input[readonly] {
+      background-color: var(--bg-core) !important;
+      cursor: pointer !important;
+    }
+    .flatpickr-input.form-input-text {
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230284c7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3crect x='3' y='4' width='18' height='18' rx='2' ry='2'%3e%3c/rect%3e%3cline x1='16' y1='2' x2='16' y2='6'%3e%3c/line%3e%3cline x1='8' y1='2' x2='8' y2='6'%3e%3c/line%3e%3cline x1='3' y1='10' x2='21' y2='10'%3e%3c/line%3e%3c/svg%3e") !important;
+      background-repeat: no-repeat !important;
+      background-position: right 12px center !important;
+      background-size: 16px 16px !important;
+      padding-right: 36px !important;
+    }
+
+    /* Primary Action Buttons */
+    .btn-action-primary {
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+      color: #ffffff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      font-weight: 700;
+      font-size: 0.84rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25);
+    }
+    .btn-action-primary:hover {
+      background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
+    }
+
+    .btn-action-purple {
+      background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+      color: #ffffff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      font-weight: 700;
+      font-size: 0.84rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 6px rgba(139, 92, 246, 0.25);
+    }
+    .btn-action-purple:hover {
+      background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);
+    }
+
+    .btn-action-secondary {
+      background: var(--bg-core);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-heading);
+      padding: 7px 14px;
+      border-radius: var(--radius-sm);
+      font-weight: 700;
+      font-size: 0.82rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .btn-action-secondary:hover {
+      background: #e0f2fe;
+      color: #0284c7;
+      border-color: #38bdf8;
+    }
+
+    /* Filters Row with Dropdowns */
+    .toolbar-filters-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 14px;
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 14px;
+    }
+    .filters-dropdown-cluster {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    /* ==========================================================================
+       EXECUTIVE TABLE VIEW
+       ========================================================================== */
+    .table-container-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-elevated);
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+    .executive-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.86rem;
+      table-layout: fixed;
+      min-width: 980px;
+    }
+    .executive-table th {
+      background: #f8fafc;
+      color: var(--text-muted);
+      font-weight: 800;
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border-subtle);
+      white-space: nowrap;
+    }
+    body:not(.light-theme) .executive-table th {
+      background: rgba(30, 41, 59, 0.7);
+    }
+    .executive-table td {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border-subtle);
+      vertical-align: middle;
+      color: var(--text-main);
+    }
+    .executive-table tbody tr {
+      transition: background 0.15s ease;
+    }
+    .executive-table tbody tr:hover {
+      background: #f0fdf4;
+    }
+    body:not(.light-theme) .executive-table tbody tr:hover {
+      background: rgba(56, 189, 248, 0.08);
+    }
+
+    /* Cell Components (Left-to-Right Inline Schedule) */
+    .cell-schedule-inline {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      white-space: nowrap;
+      flex-wrap: nowrap;
+    }
+    .cell-day-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.74rem;
+      padding: 4px 8px;
+      border-radius: 5px;
+      background: #e0f2fe;
+      color: #0369a1;
+      white-space: nowrap;
+      letter-spacing: 0.03em;
+    }
+    .cell-date-str {
+      font-weight: 700;
+      font-size: 0.88rem;
+      color: var(--text-heading);
+      white-space: nowrap;
+    }
+    .cell-time-inline {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.79rem;
+      font-weight: 700;
+      color: var(--text-heading);
+      background: var(--bg-core);
+      padding: 3px 9px;
+      border-radius: 6px;
+      border: 1px solid var(--border-subtle);
+      white-space: nowrap;
+    }
+    body:not(.light-theme) .cell-day-pill {
+      background: rgba(3, 105, 161, 0.25);
+      color: #38bdf8;
+    }
+    body:not(.light-theme) .cell-time-inline {
+      background: rgba(15, 23, 42, 0.6);
+      border-color: rgba(255, 255, 255, 0.1);
+      color: #e2e8f0;
+    }
+
+
+    .company-tag {
+      font-size: 0.74rem;
+      font-weight: 800;
+      padding: 3px 9px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      display: inline-block;
+    }
+    .company-tag.VFM { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+    .company-tag.VTS { background: #f3e8ff; color: #6b21a8; border: 1px solid #e9d5ff; }
+    .company-tag.CC { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+    .company-tag.Profox { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+
+    .cell-title-box {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .cell-title-text {
+      font-weight: 800;
+      font-size: 0.92rem;
+      color: var(--text-heading);
+    }
+    .cell-sub-text {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* Topics Badge in Table */
+    .topics-pill-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 14px;
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .topics-pill-badge:hover {
+      background: #dbeafe;
+      border-color: #3b82f6;
+    }
+    .topics-pill-empty {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+
+    /* Next Week Priority Badge */
+    .prio-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.74rem;
+      font-weight: 800;
+      padding: 3px 9px;
+      border-radius: 12px;
+      white-space: nowrap;
+    }
+    .prio-pill.HIGH { background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; }
+    .prio-pill.NORMAL { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+    .prio-pill.POSTPONE { background: #fef3c7; color: #d97706; border: 1px solid #fde68a; }
+    .prio-pill.SKIP { background: #f3f4f6; color: #9ca3af; border: 1px solid #e5e7eb; }
+
+    /* Status Pill */
+    .status-pill {
+      font-size: 0.7rem;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 10px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .status-pill.SCHEDULED { background: #e0f2fe; color: #0284c7; }
+    .status-pill.POSTPONED { background: #fef3c7; color: #b45309; }
+    .status-pill.PREPONED { background: #dcfce7; color: #15803d; }
+    .status-pill.SWAPPED { background: #f3e8ff; color: #7e22ce; }
+    .status-pill.COMPLETED { background: #ecfdf5; color: #047857; }
+
+    /* Row Action Buttons */
+    .row-actions-group {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+    .btn-table-action {
+      background: var(--bg-core);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-heading);
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+    }
+    .btn-table-action:hover {
+      background: #e0f2fe;
+      color: #0284c7;
+      border-color: #38bdf8;
+    }
+    .btn-table-action.primary {
+      background: #0284c7;
+      color: #ffffff;
+      border-color: #0284c7;
+    }
+    .btn-table-action.primary:hover {
+      background: #0369a1;
+    }
+
+    /* ==========================================================================
+       MODAL DIALOGS (INSPECT, RESCHEDULE, SWAP, ASSEMBLY)
+       ========================================================================== */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(15, 23, 42, 0.55);
+      backdrop-filter: blur(8px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .modal-card {
+      background: #ffffff;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.25);
+      width: 90%;
+      max-width: 680px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 24px 28px;
+    }
+    body:not(.light-theme) .modal-card {
+      background: #1e293b;
+    }
+
+    /* Modal Form Elements */
+    .form-group {
+      margin-bottom: 14px;
+    }
+    .form-label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 5px;
+    }
+    .form-input-text {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 8px 12px;
+      background: var(--bg-core);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      font-family: inherit;
+      font-size: 0.88rem;
+      color: var(--text-heading);
+    }
+    .form-textarea {
+      width: 100%;
+      box-sizing: border-box;
+      min-height: 80px;
+      padding: 10px 12px;
+      background: var(--bg-core);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      font-family: inherit;
+      font-size: 0.88rem;
+      line-height: 1.45;
+      color: var(--text-heading);
+      resize: vertical;
+    }
+
+    /* Checklist in Inspect Modal */
+    .inspect-checklist-box {
+      background: #f8fafc;
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-bottom: 16px;
+    }
+    body:not(.light-theme) .inspect-checklist-box {
+      background: rgba(15, 23, 42, 0.5);
+    }
+    .checklist-progress-bar {
+      height: 6px;
+      background: #e2e8f0;
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 6px;
+      margin-bottom: 12px;
+    }
+    .checklist-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #0284c7, #10b981);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    .checklist-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 8px 14px;
+      max-height: 240px;
+      overflow-y: auto;
+      padding-right: 6px;
+    }
+    .checklist-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 0.82rem;
+      line-height: 1.35;
+      cursor: pointer;
+    }
+    .checklist-row input[type="checkbox"] {
+      margin-top: 3px;
+      accent-color: #0284c7;
+      cursor: pointer;
+    }
+    .scope-tag {
+      font-size: 0.65rem;
+      font-weight: 800;
+      padding: 1px 4px;
+      border-radius: 3px;
+      background: #e2e8f0;
+      color: #334155;
+    }
+  </style>
+</head>
+<body class="light-theme">
+  <div class="app-container">
+    <!-- Top Executive Header -->
+    <header class="executive-header">
+      <div class="brand-group">
+        <div class="agent-avatar">
+          <div class="pulse-ring"></div>
+          <span class="avatar-icon">🤝</span>
+        </div>
+        <div class="brand-text">
+          <div class="badge-row">
+            <span class="badge badge-glow">EXECUTIVE OPERATIONS FLIGHT DECK</span>
+            <span class="badge badge-schedule">WEEKLY MASTER MATRIX & MD DIRECTIVES</span>
+          </div>
+          <h1>Executive Meetings & Directives Hub</h1>
+          <p class="subtitle">Structured review meetings for VFM, VTS, CC & Profox with agenda topics, rescheduling & MD priorities</p>
+        </div>
+      </div>
+
+      <div class="header-status-panel">
+        <button id="btn-theme-toggle" class="btn-theme-toggle" title="Toggle Light / Dark Mode" aria-label="Toggle Theme">
+          <span class="theme-icon" id="theme-icon">🌙</span>
+          <span class="theme-text" id="theme-text">Dark Mode</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Navigation Bar -->
+    <nav class="nav-bar-row">
+      <div class="nav-links">
+        <a href="/" class="nav-link">🏠 Home Portal</a>
+        <a href="/checklist" class="nav-link">📋 Daily Checklist</a>
+        <a href="/audit" class="nav-link">🧠 Agent AI Summary</a>
+        <a href="/calendar" class="nav-link">📅 Operations Calendar</a>
+        <a href="/meetings" class="nav-link active">🤝 Executive Meetings</a>
+      </div>
+      <div class="cal-stats-strip">
+        <span class="stat-pill pill-blue" id="stat-total-meetings">🤝 -- Meetings</span>
+        <span class="stat-pill pill-green" id="stat-topics-progress">📌 -- Topics Covered</span>
+        <span class="stat-pill pill-amber" id="stat-directives-logged">📝 -- Directives Logged</span>
+      </div>
+    </nav>
+
+    <!-- Command & Control Toolbar -->
+    <section class="command-toolbar-card">
+      <!-- Top Row: Week Switcher & Main Actions -->
+      <div class="toolbar-top-row">
+        <div class="week-nav-group">
+          <button id="btn-prev-week" class="btn-nav-week" title="Previous Week">◀ Prev Week</button>
+          <div class="week-title-badge">
+            <span>📅</span>
+            <span id="week-date-range">Active Week: 12 Oct – 17 Oct 2026</span>
+          </div>
+          <button id="btn-next-week" class="btn-nav-week" title="Next Week">Next Week ▶</button>
+        </div>
+
+        <div class="toolbar-actions-group">
+          <button id="btn-prepare-upcoming-week" class="btn-action-primary" title="Generates next week schedule incorporating this week's MD priorities">
+            <span>⚡ Prepare Upcoming Week</span>
+          </button>
+          <button id="btn-open-monthly-assembly-modal" class="btn-action-purple" title="Schedule Monthly OM & FM Assembly at 8:00 AM">
+            <span>📢 Monthly OM & FM (8 AM)</span>
+          </button>
+          <button id="btn-open-schedule-modal" class="btn-action-secondary" title="Add ad-hoc executive meeting">
+            <span>+ Ad-hoc Meeting</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Filters Row: Clean Styled Dropdowns -->
+      <div class="toolbar-filters-row">
+        <div class="filters-dropdown-cluster">
+          <!-- Company Dropdown -->
+          <div class="select-group">
+            <span class="select-label">Company:</span>
+            <select id="filter-company-select" class="custom-select">
+              <option value="ALL">🏢 All Companies</option>
+              <option value="VFM">🏢 VFM (Vipras Facility Management)</option>
+              <option value="VTS">⚡ VTS (Vipras Tech Solutions)</option>
+              <option value="CC">💼 CC (City Coolies)</option>
+              <option value="PROFOX">🦊 Profox</option>
+            </select>
+          </div>
+
+          <!-- Schedule Day Dropdown -->
+          <div class="select-group">
+            <span class="select-label">Day:</span>
+            <select id="filter-day-select" class="custom-select">
+              <option value="ALL">All Schedule Days</option>
+              <option value="0">Monday</option>
+              <option value="1">Tuesday</option>
+              <option value="2">Wednesday</option>
+              <option value="5">Saturday (First Half)</option>
+            </select>
+          </div>
+
+          <!-- Priority Filter Dropdown -->
+          <div class="select-group">
+            <span class="select-label">Priority:</span>
+            <select id="filter-priority-select" class="custom-select">
+              <option value="ALL">All Priorities</option>
+              <option value="HIGH">🔥 High Focus</option>
+              <option value="NORMAL">⚡ Normal</option>
+              <option value="POSTPONE">⏸️ Postponed</option>
+              <option value="SKIP">❌ Skipped</option>
+            </select>
+          </div>
+
+          <!-- Status Filter Dropdown -->
+          <div class="select-group">
+            <span class="select-label">Status:</span>
+            <select id="filter-status-select" class="custom-select">
+              <option value="ALL">All Statuses</option>
+              <option value="SCHEDULED">Scheduled</option>
+              <option value="POSTPONED">Postponed</option>
+              <option value="PREPONED">Preponed</option>
+              <option value="SWAPPED">Swapped</option>
+              <option value="COMPLETED">Completed</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <button id="btn-reset-filters" class="btn-action-secondary" style="padding: 6px 14px;">
+            <span>Reset Filters</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Executive Meetings Data Table (Clean 4 Columns) -->
+    <main class="table-container-card">
+      <div style="overflow-x: auto;">
+        <table class="executive-table">
+          <thead>
+            <tr>
+              <th style="width: 32%; white-space: nowrap;">Schedule (Date, Day & Time)</th>
+              <th style="width: 42%;">Department & Title</th>
+              <th style="width: 14%; text-align: center;">Next Week Priority</th>
+              <th style="width: 12%; text-align: center;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="meetings-table-body">
+            <tr>
+              <td colspan="4" style="text-align: center; padding: 50px; color: var(--text-muted);">
+                Loading executive meetings table...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <!-- ==========================================================================
+       MODAL 1: VIEW & DIRECTIVES MODAL (ALL DETAILS, CHECKLIST, RESCHEDULE, DIRECTIVES)
+       ========================================================================== -->
+  <div id="inspect-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 12px;">
+        <div>
+          <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 6px;">
+            <span id="inspect-company-tag" class="company-tag VFM">VFM</span>
+            <span id="inspect-time-pill" class="cell-time-pill">⏰ 11:00 AM - 01:00 PM</span>
+            <span id="inspect-status-pill" class="status-pill SCHEDULED">SCHEDULED</span>
+          </div>
+          <h2 id="inspect-title" style="margin: 0; font-size: 1.25rem; font-weight: 800; color: var(--text-heading);">
+            Meeting Title
+          </h2>
+          <div id="inspect-meta" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">
+            📍 Head Office Boardroom • 📅 Monday, 12 Oct 2026
+          </div>
+        </div>
+        <button id="btn-close-inspect-modal" style="background: none; border: none; font-size: 1.3rem; color: var(--text-muted); cursor: pointer; padding: 4px;">✕</button>
+      </div>
+
+      <input type="hidden" id="inspect-meeting-id">
+
+      <!-- Inside Modal: Reschedule / Swap Action Bar & History -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; background: var(--bg-core); padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-subtle); flex-wrap: wrap; gap: 8px;">
+        <div id="inspect-history-strip" style="font-size: 0.76rem; color: #b45309; display: flex; align-items: center; gap: 4px;">
+          <!-- History log populated dynamically -->
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button type="button" id="btn-inspect-reschedule" class="btn-action-secondary" style="font-size: 0.78rem; padding: 5px 12px;">
+            <span>🔄 Reschedule (Postpone / Prepone)</span>
+          </button>
+          <button type="button" id="btn-inspect-swap" class="btn-action-secondary" style="font-size: 0.78rem; padding: 5px 12px;">
+            <span>⇄ Swap Meeting</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Section A: Agenda Topics Checklist (if department has topics) -->
+      <div id="inspect-topics-section" style="display: none;" class="inspect-checklist-box">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <strong style="font-size: 0.85rem; color: var(--text-heading);">📌 Department Agenda Topics Checklist</strong>
+          <span id="inspect-topics-count" style="font-size: 0.78rem; font-weight: 700; color: #0284c7;">0/19 Covered</span>
+        </div>
+        <div class="checklist-progress-bar">
+          <div id="inspect-progress-fill" class="checklist-progress-fill"></div>
+        </div>
+        <div id="inspect-checklist-grid" class="checklist-grid">
+          <!-- Populated dynamically via JS -->
+        </div>
+      </div>
+
+      <!-- Section B: MD Directives & Feedback Textarea -->
+      <div class="form-group">
+        <label class="form-label" style="color: #1e40af;">📝 MD Decisions, Directives & Feedback (Current Review):</label>
+        <textarea id="inspect-feedback-text" class="form-textarea" placeholder="Record executive decisions, instructions, or action items given by MD..."></textarea>
+      </div>
+
+      <!-- Section C: MD Next Week Priority (Crucial for Dynamic Planning) -->
+      <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 12px 14px; margin-bottom: 20px;">
+        <label class="form-label" style="color: #1e40af; margin-bottom: 8px;">🎯 MD Next Week Action Priority:</label>
+        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+          <select id="inspect-priority-select" class="custom-select" style="min-width: 170px;">
+            <option value="HIGH">🔥 HIGH FOCUS</option>
+            <option value="NORMAL">⚡ NORMAL</option>
+            <option value="POSTPONE">⏸️ POSTPONE TO NEXT WEEK</option>
+            <option value="SKIP">❌ SKIP / CANCEL</option>
+          </select>
+          <input type="text" id="inspect-priority-notes" class="form-input-text" placeholder="Next week focus directives for this department..." style="flex: 1; min-width: 220px;">
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button type="button" id="btn-cancel-inspect" class="btn-action-secondary">Cancel</button>
+        <button type="button" id="btn-save-inspect-directives" class="btn-action-primary">
+          💾 Save Directives & Priority
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       MODAL 2: RESCHEDULE (POSTPONE / PREPONE / TIME ADJUST)
+       ========================================================================== -->
+  <div id="reschedule-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 10px;">
+        <h3 style="margin: 0; font-size: 1.15rem; color: #0284c7; display: flex; align-items: center; gap: 8px;">
+          🔄 Reschedule Meeting (Postpone / Prepone)
+        </h3>
+        <button id="btn-close-reschedule-modal" style="background: none; border: none; font-size: 1.2rem; color: var(--text-muted); cursor: pointer;">✕</button>
+      </div>
+
+      <form id="reschedule-form">
+        <input type="hidden" id="reschedule-meeting-id">
+        <div class="form-group">
+          <label class="form-label">Meeting</label>
+          <div id="reschedule-meeting-title" style="font-weight: 800; font-size: 0.95rem; color: var(--text-heading);">--</div>
+        </div>
+
+        <div style="display: flex; gap: 12px; margin-bottom: 14px;">
+          <div style="flex: 1;">
+            <label class="form-label">New Date</label>
+            <input type="text" id="reschedule-new-date" required class="form-input-text date-picker-input" placeholder="Select New Date">
+          </div>
+          <div style="flex: 1;">
+            <label class="form-label">New Time Slot</label>
+            <input type="text" id="reschedule-new-time" placeholder="e.g. 02:00 PM - 03:30 PM" class="form-input-text">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Reason / Instruction</label>
+          <input type="text" id="reschedule-reason" placeholder="e.g. Postponed to Wednesday due to site visit" class="form-input-text">
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="button" id="btn-cancel-reschedule" class="btn-action-secondary">Cancel</button>
+          <button type="submit" class="btn-action-primary">Confirm Reschedule</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       MODAL 3: SWAP MEETINGS
+       ========================================================================== -->
+  <div id="swap-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 10px;">
+        <h3 style="margin: 0; font-size: 1.15rem; color: #8b5cf6; display: flex; align-items: center; gap: 8px;">
+          ⇄ Swap Meeting Schedule Slots
+        </h3>
+        <button id="btn-close-swap-modal" style="background: none; border: none; font-size: 1.2rem; color: var(--text-muted); cursor: pointer;">✕</button>
+      </div>
+
+      <form id="swap-form">
+        <input type="hidden" id="swap-meeting-id-a">
+        <div class="form-group">
+          <label class="form-label">Meeting A (Source)</label>
+          <div id="swap-meeting-title-a" style="font-weight: 800; font-size: 0.95rem; color: var(--text-heading);">--</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Swap With (Meeting B in Schedule):</label>
+          <select id="swap-target-select" required class="custom-select" style="width: 100%;">
+            <!-- Populated via JS -->
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Reason / Instruction</label>
+          <input type="text" id="swap-reason" placeholder="e.g. Swapped slots per MD operational instruction" class="form-input-text">
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="button" id="btn-cancel-swap" class="btn-action-secondary">Cancel</button>
+          <button type="submit" class="btn-action-purple">Confirm Swap</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       MODAL 4: MONTHLY OM & FM ASSEMBLY (8:00 AM)
+       ========================================================================== -->
+  <div id="monthly-assembly-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 10px;">
+        <h3 style="margin: 0; font-size: 1.15rem; color: #8b5cf6; display: flex; align-items: center; gap: 8px;">
+          📢 Schedule Monthly OM & FM Assembly (8:00 AM)
+        </h3>
+        <button id="btn-close-assembly-modal" style="background: none; border: none; font-size: 1.2rem; color: var(--text-muted); cursor: pointer;">✕</button>
+      </div>
+
+      <form id="assembly-form">
+        <p style="font-size: 0.84rem; color: var(--text-muted); margin-bottom: 14px;">
+          The full Operations Managers & Facility Managers monthly assembly starts early at <strong>08:00 AM</strong> (First half). Pick any Saturday decided by MD.
+        </p>
+
+        <div class="form-group">
+          <label class="form-label">Assembly Date (Saturday)</label>
+          <input type="text" id="assembly-date" required class="form-input-text date-picker-input" placeholder="Select Saturday Date">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Location</label>
+          <input type="text" id="assembly-location" value="Main Assembly Hall / Head Office Boardroom" class="form-input-text">
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="button" id="btn-cancel-assembly" class="btn-action-secondary">Cancel</button>
+          <button type="submit" class="btn-action-purple">Schedule Assembly</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       MODAL 5: AD-HOC MEETING
+       ========================================================================== -->
+  <div id="meeting-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 10px;">
+        <h3 style="margin: 0; font-size: 1.15rem; color: #0284c7; display: flex; align-items: center; gap: 8px;">
+          🤝 Schedule Ad-hoc Meeting
+        </h3>
+        <button id="btn-close-meeting-modal" style="background: none; border: none; font-size: 1.2rem; color: var(--text-muted); cursor: pointer;">✕</button>
+      </div>
+
+      <form id="meeting-form">
+        <div class="form-group">
+          <label class="form-label">Date</label>
+          <input type="text" id="input-mtg-date" required class="form-input-text date-picker-input" placeholder="Select Meeting Date">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Meeting Title</label>
+          <input type="text" id="input-mtg-title" required placeholder="e.g. VIPRAS Tech Quarterly Sprint" class="form-input-text">
+        </div>
+
+        <div style="display: flex; gap: 12px; margin-bottom: 14px;">
+          <div style="flex: 1;">
+            <label class="form-label">Company</label>
+            <select id="input-mtg-company" class="custom-select" style="width: 100%;">
+              <option value="VFM">VFM</option>
+              <option value="VTS">VTS</option>
+              <option value="CC">CC</option>
+              <option value="Profox">Profox</option>
+            </select>
+          </div>
+          <div style="flex: 1;">
+            <label class="form-label">Time Slot</label>
+            <input type="text" id="input-mtg-time" value="11:00 AM – 12:30 PM" class="form-input-text">
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="button" id="btn-cancel-modal" class="btn-action-secondary">Cancel</button>
+          <button type="submit" class="btn-action-primary">Schedule Meeting</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/static/vendor/flatpickr.min.js"></script>
+  <script src="/static/meetings.js?v=20261013_v9"></script>
+</body>
+</html>

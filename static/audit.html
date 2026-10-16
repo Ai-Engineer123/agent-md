@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agent Operational Summary — Executive Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <style>
+    .nav-bar-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding: 14px 24px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-elevated);
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .nav-links {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-link.active, .nav-link:hover {
+      color: var(--accent-cyan);
+      background: rgba(0, 229, 255, 0.12);
+    }
+    .controls-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .date-filter-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--bg-input);
+      padding: 6px 14px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+    }
+    .date-filter-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .date-input {
+      background: transparent;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      font-size: 0.88rem;
+      padding: 5px 8px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+    }
+    .date-input:focus {
+      outline: none;
+      border-color: var(--accent-cyan);
+    }
+    .btn-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 14px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-card);
+      color: var(--text-main);
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+    .btn-action:hover {
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+      background: rgba(0, 229, 255, 0.08);
+    }
+    .btn-action-primary {
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+      color: #ffffff;
+      border: none;
+      font-weight: 700;
+    }
+    .btn-action-primary:hover {
+      background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);
+    }
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(15, 23, 42, 0.55);
+      backdrop-filter: blur(8px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .modal-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 20px 40px rgba(15, 23, 42, 0.2);
+      width: 90%;
+      max-width: 480px;
+      padding: 24px 28px;
+    }
+    /* Drill-down Badge Buttons */
+    .btn-drilldown-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-left: 12px;
+      vertical-align: middle;
+      padding: 4px 12px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      border-radius: 20px;
+      cursor: pointer;
+      border: 1px solid #7dd3fc;
+      background: #e0f2fe;
+      color: #0284c7;
+      text-transform: none;
+      transition: all 0.2s ease;
+      font-family: inherit;
+      box-shadow: 0 2px 6px rgba(2, 132, 199, 0.12);
+    }
+    .btn-drilldown-action:hover {
+      background: #bae6fd;
+      border-color: #0284c7;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(2, 132, 199, 0.25);
+    }
+    .btn-drilldown-action.amber {
+      border-color: #fde68a;
+      background: #fef3c7;
+      color: #b45309;
+      box-shadow: 0 2px 6px rgba(217, 119, 6, 0.12);
+    }
+    .btn-drilldown-action.amber:hover {
+      background: #fde68a;
+      border-color: #d97706;
+      box-shadow: 0 4px 10px rgba(217, 119, 6, 0.25);
+    }
+    .btn-drilldown-action.emerald {
+      border-color: #a7f3d0;
+      background: #d1fae5;
+      color: #047857;
+      box-shadow: 0 2px 6px rgba(5, 150, 105, 0.12);
+    }
+    .btn-drilldown-action.emerald:hover {
+      background: #a7f3d0;
+      border-color: #059669;
+      box-shadow: 0 4px 10px rgba(5, 150, 105, 0.25);
+    }
+
+    /* Drilldown Modal Card */
+    .drilldown-modal-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 25px 60px rgba(15, 23, 42, 0.22);
+      width: 95%;
+      max-width: 920px;
+      max-height: 86vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .drilldown-modal-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--bg-core);
+    }
+    .drilldown-modal-body {
+      padding: 22px 24px;
+      overflow-y: auto;
+      flex: 1;
+      background: var(--bg-card);
+    }
+    .drilldown-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 18px;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .drilldown-tab-btn {
+      padding: 6px 16px;
+      border-radius: 20px;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-input);
+      color: var(--text-muted);
+      font-size: 0.84rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+    .drilldown-tab-btn:hover {
+      color: var(--text-heading);
+      border-color: var(--accent-cyan);
+    }
+    .drilldown-tab-btn.active {
+      background: #e0f2fe;
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.18);
+    }
+    .dd-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 0.88rem;
+    }
+    .dd-table th {
+      background: var(--bg-core);
+      color: var(--accent-cyan);
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 2px solid var(--border-subtle);
+    }
+    .dd-table td {
+      padding: 11px 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      vertical-align: middle;
+    }
+    .dd-table tr:hover td {
+      background: rgba(2, 132, 199, 0.04);
+    }
+    .badge-pill {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+    .badge-pill.leave {
+      background: #fef3c7;
+      border: 1px solid #fde68a;
+      color: #b45309;
+    }
+    .badge-pill.unchecked {
+      background: #fee2e2;
+      border: 1px solid #fecaca;
+      color: #dc2626;
+    }
+    .badge-pill.submitted {
+      background: #d1fae5;
+      border: 1px solid #a7f3d0;
+      color: #047857;
+    }
+    /* Executive Briefing Card */
+    .summary-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-elevated);
+      padding: 32px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Rich Briefing Typography */
+    .briefing-content {
+      color: var(--text-main);
+      font-size: 1.02rem;
+      line-height: 1.7;
+    }
+    .briefing-content h1,
+    .briefing-content h2,
+    .briefing-content h3 {
+      color: var(--text-heading);
+      margin-top: 28px;
+      margin-bottom: 14px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+    .briefing-content h1 {
+      font-size: 1.55rem;
+      border-bottom: 2px solid var(--border-subtle);
+      padding-bottom: 10px;
+      color: var(--accent-cyan);
+    }
+    .briefing-content h2 {
+      font-size: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #0369a1;
+      font-weight: 700;
+    }
+    .briefing-content h3 {
+      font-size: 1.1rem;
+      color: var(--text-heading);
+    }
+    .briefing-content p {
+      margin-bottom: 14px;
+    }
+    .briefing-content ul,
+    .briefing-content ol {
+      margin-bottom: 16px;
+      padding-left: 24px;
+    }
+    .briefing-content li {
+      margin-bottom: 8px;
+    }
+    .briefing-content strong {
+      color: var(--text-heading);
+      font-weight: 700;
+    }
+    .briefing-content hr {
+      border: 0;
+      height: 1px;
+      background: var(--border-subtle);
+      margin: 28px 0;
+    }
+    .briefing-content blockquote {
+      background: #fffbeb;
+      border-left: 4px solid var(--accent-amber);
+      padding: 12px 20px;
+      border-radius: 0 var(--radius-md) var(--radius-md) 0;
+      margin: 18px 0;
+      color: #334155;
+      font-weight: 500;
+    }
+    .briefing-content table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      background: var(--bg-card);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid var(--border-subtle);
+    }
+    .briefing-content th,
+    .briefing-content td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-subtle);
+      font-size: 0.92rem;
+    }
+    .briefing-content th {
+      background: var(--bg-core);
+      font-weight: 700;
+      color: var(--accent-cyan);
+      font-family: var(--font-mono);
+      font-size: 0.84rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      border-bottom: 2px solid var(--border-subtle);
+    }
+    .briefing-content tr:last-child td {
+      border-bottom: none;
+    }
+    .briefing-content tr:hover td {
+      background: rgba(2, 132, 199, 0.04);
+    }
+    .loading-spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(2, 132, 199, 0.25);
+      border-top-color: var(--accent-cyan);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body class="light-theme">
+  <div class="app-container">
+    <!-- Header with Brand & Theme Toggle -->
+    <header class="executive-header">
+      <div class="brand-group">
+        <div class="agent-avatar">
+          <div class="pulse-ring"></div>
+          <span class="avatar-icon">🧠</span>
+        </div>
+        <div class="brand-text">
+          <div class="badge-row">
+            <span class="badge badge-glow">AGENT EXECUTIVE BRIEFING</span>
+            <span class="badge badge-schedule" id="date-badge">DATE: --</span>
+          </div>
+          <h1>Agent Operational Intelligence</h1>
+          <p class="subtitle">Daily Routine Executive Summary synthesized by AI Agent (Ollama Cloud gpt-oss:120b)</p>
+        </div>
+      </div>
+
+      <div class="header-status-panel">
+        <button id="btn-theme-toggle" class="btn-theme-toggle" title="Toggle Light / Dark Mode" aria-label="Toggle Theme">
+          <span class="theme-icon" id="theme-icon">🌙</span>
+          <span class="theme-text" id="theme-text">Dark Mode</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Navigation Bar & Controls -->
+    <nav class="nav-bar-row">
+      <div class="nav-links">
+        <a href="/" class="nav-link">🏠 Home Portal</a>
+        <a href="/checklist" class="nav-link">📋 Daily Checklist</a>
+        <a href="/audit" class="nav-link active">🧠 Agent AI Summary</a>
+        <a href="/calendar" class="nav-link">📅 Operations Calendar</a>
+        <a href="/meetings" class="nav-link">🤝 Executive Meetings</a>
+      </div>
+
+      <div class="controls-group">
+        <!-- Date Filter -->
+        <div class="date-filter-box">
+          <label for="filter-date" class="date-filter-label">📅 Date:</label>
+          <input type="date" id="filter-date" class="date-input">
+        </div>
+
+        <!-- Email Integration Actions -->
+        <a id="btn-preview-email" target="_blank" href="/api/email/preview-html" class="btn-action" title="Open Luxury HTML Email Preview in a new tab">
+          <span>👁️ Preview Email</span>
+        </a>
+        <!-- Email sending disabled per request
+        <button id="btn-open-email-modal" class="btn-action btn-action-primary" title="Send HTML Briefing directly to email">
+          <span>✉️ Send Email</span>
+        </button>
+        -->
+
+        <!-- Twilio Voice Call Action -->
+        <button id="btn-open-call-modal" class="btn-action" style="border-color: rgba(16, 185, 129, 0.4); color: #34d399;" title="Trigger Twilio Automated Phone Briefing">
+          <span>📞 Call Briefing</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Main Container: Agent AI Briefing Only -->
+    <main>
+      <div class="summary-card">
+        <!-- Rendered Briefing Body -->
+        <div id="briefing-container" class="briefing-content">
+          <div style="text-align: center; padding: 50px 20px; color: var(--text-dim);">
+            <div class="loading-spinner" style="width: 32px; height: 32px; border-width: 3px; border-top-color: var(--accent-cyan); margin-bottom: 16px;"></div>
+            <p>Loading Agent Executive Briefing from Ollama Cloud...</p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Send Email Modal Dialog -->
+  <div id="email-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h3 style="margin: 0; font-size: 1.15rem; color: var(--accent-cyan); display: flex; align-items: center; gap: 8px;">
+          ✉️ Send Executive Briefing Email
+        </h3>
+        <button id="btn-close-modal" style="background: none; border: none; font-size: 1.2rem; color: var(--text-muted); cursor: pointer;">✕</button>
+      </div>
+      <p style="font-size: 0.88rem; color: var(--text-dim); margin-bottom: 18px;">
+        Dispatches the complete high-fidelity HTML briefing for <strong id="modal-date-display" style="color: var(--text-main);">Today</strong> directly to the recipient's inbox.
+      </p>
+
+      <div style="margin-bottom: 16px;">
+        <label for="input-recipient-email" style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
+          Recipient Email:
+        </label>
+        <input type="email" id="input-recipient-email" placeholder="e.g. director@company.com" style="width: 100%; box-sizing: border-box; padding: 10px 14px; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); color: var(--text-main); font-size: 0.95rem; font-family: inherit;">
+      </div>
+
+      <div id="email-status-box" style="display: none; padding: 12px; border-radius: var(--radius-sm); font-size: 0.85rem; margin-bottom: 16px;"></div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button id="btn-cancel-modal" class="btn-action">Cancel</button>
+        <button id="btn-confirm-send" class="btn-action btn-action-primary">
+          <span id="btn-send-text">Send Briefing</span>
+          <span id="btn-send-spinner" class="loading-spinner" style="display: none; margin-left: 6px;"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Twilio Voice Call Modal Dialog -->
+  <div id="call-modal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 520px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+        <h3 style="margin: 0; font-size: 1.15rem; color: #34d399; display: flex; align-items: center; gap: 8px;">
+          📞 Automated Phone Briefing (Twilio Voice)
+        </h3>
+        <button id="btn-close-call-modal" style="background: none; border: none; font-size: 1.2rem; color: var(--text-muted); cursor: pointer;">✕</button>
+      </div>
+      <p style="font-size: 0.86rem; color: var(--text-dim); margin-bottom: 16px;">
+        The AI Agent will place an automated phone call to the recipient and speak today's key operational highlights using Indian English Neural Text-to-Speech (Polly.Aditi).
+      </p>
+
+      <div style="margin-bottom: 14px;">
+        <label for="input-recipient-phone" style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;">
+          Recipient Phone Number:
+        </label>
+        <input type="tel" id="input-recipient-phone" placeholder="e.g. +919876543210" style="width: 100%; box-sizing: border-box; padding: 10px 14px; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); color: var(--text-main); font-size: 0.95rem; font-family: inherit;">
+      </div>
+
+      <div style="margin-bottom: 14px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+          <span style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Spoken Speech Preview:</span>
+          <span style="font-size: 0.74rem; color: var(--accent-cyan); font-family: var(--font-mono);">Voice: Polly.Aditi (en-IN)</span>
+        </div>
+        <div id="call-speech-preview" style="background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 12px; font-size: 0.82rem; color: var(--text-main); line-height: 1.5; max-height: 110px; overflow-y: auto;">
+          Loading speech script...
+        </div>
+      </div>
+
+      <div id="call-status-box" style="display: none; padding: 12px; border-radius: var(--radius-sm); font-size: 0.84rem; margin-bottom: 16px;"></div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button id="btn-cancel-call-modal" class="btn-action">Cancel</button>
+        <button id="btn-confirm-call" class="btn-action" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; border: none; font-weight: 700;">
+          <span id="btn-call-text">Dial Phone Call</span>
+          <span id="btn-call-spinner" class="loading-spinner" style="display: none; margin-left: 6px;"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Audit Task Granular Drill-Down Modal Dialog -->
+  <div id="drilldown-modal" class="modal-overlay">
+    <div class="drilldown-modal-card">
+      <div class="drilldown-modal-header">
+        <div>
+          <h3 id="drilldown-modal-title" style="margin: 0; font-size: 1.15rem; color: var(--accent-cyan); display: flex; align-items: center; gap: 8px;">
+            🔍 Audit Drill-Down Details
+          </h3>
+          <p id="drilldown-modal-subtitle" style="margin: 4px 0 0 0; font-size: 0.82rem; color: var(--text-dim);">
+            Granular system records verified from local database
+          </p>
+        </div>
+        <button id="btn-close-drilldown-modal" style="background: none; border: none; font-size: 1.4rem; color: var(--text-muted); cursor: pointer; padding: 4px 8px; line-height: 1;">✕</button>
+      </div>
+
+      <div id="drilldown-modal-body" class="drilldown-modal-body">
+        <!-- Dynamically injected tabs, metrics, and tables -->
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/marked.min.js"></script>
+  <script src="/static/audit.js?v=20261011_v14"></script>
+</body>
+</html>

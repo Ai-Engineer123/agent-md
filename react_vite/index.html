@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>A.E.G.I.S // MD Executive Robotic Agent</title>
+  <!-- Google Fonts: Space Grotesk, DM Sans & Outfit (Bold Geometric Sans-Serif) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Outfit:wght@300..900&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      /* ========================================================================= */
+      /* 🌐 GLOBAL FONT CONTROLLER: BOLD MODERN GEOMETRIC SANS-SERIF               */
+      /* ========================================================================= */
+      --font-standard: 'Space Grotesk', 'DM Sans', sans-serif;
+    }
+
+    *,
+    body,
+    button,
+    input,
+    textarea,
+    select,
+    p,
+    span,
+    div,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    label,
+    a,
+    th,
+    td {
+      font-family: var(--font-standard);
+    }
+
+    body {
+      font-weight: 400;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      color: #0F172A;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    strong,
+    b,
+    .font-bold,
+    .font-extrabold,
+    .font-black {
+      font-weight: 700;
+    }
+
+    button,
+    .btn,
+    .pill,
+    .badge,
+    [role="button"],
+    th,
+    .metric-value,
+    .stat-value,
+    .counter-value,
+    .kpi-number {
+      font-weight: 600;
+    }
+
+    p,
+    span,
+    div,
+    label,
+    li,
+    td,
+    input,
+    textarea,
+    select {
+      font-weight: 400;
+    }
+
+    /* ========================================================================= */
+    /* 🚫 COMPLETELY HIDE SCROLLBAR ACROSS ALL BROWSERS (SCROLL STILL WORKS)     */
+    /* ========================================================================= */
+    html,
+    body,
+    * {
+      scrollbar-width: none !important;        /* Firefox */
+      -ms-overflow-style: none !important;     /* IE & Edge */
+    }
+
+    ::-webkit-scrollbar,
+    html::-webkit-scrollbar,
+    body::-webkit-scrollbar,
+    *::-webkit-scrollbar {
+      display: none !important;                /* Chrome, Safari, Opera */
+      width: 0 !important;
+      height: 0 !important;
+      background: transparent !important;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+
+</html>

@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Operations & Meeting Calendar — Executive Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css?v=20261011_v14">
+  <style>
+    /* Navigation Bar */
+    .nav-bar-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding: 14px 24px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-elevated);
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .nav-links {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-link.active, .nav-link:hover {
+      color: var(--accent-cyan);
+      background: #e0f2fe;
+    }
+
+    /* Main Layout */
+    .calendar-layout {
+      display: grid;
+      grid-template-columns: 1fr 390px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    /* Calendar Card & Controls */
+    .cal-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-elevated);
+      padding: 24px;
+    }
+
+    .cal-header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .cal-month-title-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .cal-month-title {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--text-heading);
+      letter-spacing: -0.02em;
+      margin: 0;
+    }
+    .cal-nav-btn-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .cal-nav-btn {
+      background: var(--bg-core);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-heading);
+      padding: 7px 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.88rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s ease;
+    }
+    .cal-nav-btn:hover {
+      background: #e0f2fe;
+      color: var(--accent-cyan);
+      border-color: var(--accent-cyan);
+    }
+    .cal-today-btn {
+      background: #e0f2fe;
+      color: var(--accent-cyan);
+      border: 1px solid #7dd3fc;
+      padding: 7px 14px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.82rem;
+      transition: all 0.2s ease;
+    }
+    .cal-today-btn:hover {
+      background: #bae6fd;
+    }
+
+    .cal-stats-strip {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .stat-pill {
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 20px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .stat-pill.pill-blue {
+      background: #e0f2fe;
+      color: #0284c7;
+      border: 1px solid #bae6fd;
+    }
+    .stat-pill.pill-green {
+      background: #d1fae5;
+      color: #047857;
+      border: 1px solid #a7f3d0;
+    }
+    .stat-pill.pill-amber {
+      background: #fef3c7;
+      color: #b45309;
+      border: 1px solid #fde68a;
+    }
+
+    /* Calendar Grid */
+    .cal-grid-weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .cal-weekday-header {
+      text-align: center;
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 8px 0;
+      font-family: var(--font-mono);
+    }
+
+    .cal-grid-days {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+    }
+    .cal-day-cell {
+      min-height: 104px;
+      background: var(--bg-core);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 8px 10px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+    }
+    .cal-day-cell:hover {
+      background: #ffffff;
+      border-color: var(--accent-cyan);
+      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.15);
+      transform: translateY(-2px);
+      z-index: 2;
+    }
+    .cal-day-cell.selected {
+      background: #ffffff;
+      border: 2px solid var(--accent-cyan);
+      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.2);
+    }
+    .cal-day-cell.empty {
+      background: transparent;
+      border: 1px dashed rgba(226, 232, 240, 0.6);
+      cursor: default;
+      pointer-events: none;
+      opacity: 0.35;
+    }
+
+    .cal-day-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .cal-day-num {
+      font-family: var(--font-mono);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-heading);
+      width: 26px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+    .cal-day-cell.is-today .cal-day-num {
+      background: var(--accent-cyan);
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.35);
+    }
+    .cal-day-badges {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    /* Status Badges inside cell - Compact & Short */
+    .cal-mini-row {
+      display: flex;
+      gap: 3px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .mini-chip {
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 2px 5px;
+      border-radius: 4px;
+      line-height: 1.1;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+    }
+    .mini-chip.done {
+      background: #d1fae5;
+      color: #047857;
+      border: 1px solid #a7f3d0;
+    }
+    .mini-chip.in-progress {
+      background: #fef3c7;
+      color: #b45309;
+      border: 1px solid #fde68a;
+    }
+    .mini-chip.pending {
+      background: #f1f5f9;
+      color: #64748b;
+      border: 1px solid #e2e8f0;
+    }
+
+    .chip-checklist {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      line-height: 1.2;
+      white-space: nowrap;
+    }
+    .chip-checklist.done {
+      background: #d1fae5;
+      color: #047857;
+      border: 1px solid #a7f3d0;
+    }
+    .chip-checklist.in-progress {
+      background: #fef3c7;
+      color: #b45309;
+      border: 1px solid #fde68a;
+    }
+    .chip-checklist.pending {
+      background: #f1f5f9;
+      color: #64748b;
+      border: 1px solid #e2e8f0;
+    }
+
+    /* Inspector Pills & Compact Boxes */
+    .ins-item-pills {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .badge-pill {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 999px;
+      line-height: 1.2;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      white-space: nowrap;
+    }
+    .badge-pill.done {
+      background: #ecfdf5;
+      color: #047857;
+      border: 1px solid #a7f3d0;
+    }
+    .badge-pill.pending {
+      background: #fffbeb;
+      color: #b45309;
+      border: 1px solid #fde68a;
+    }
+    .badge-pill.alert {
+      background: #fff1f2;
+      color: #be123c;
+      border: 1px solid #fecdd3;
+    }
+    .badge-pill.muted {
+      background: #f1f5f9;
+      color: #64748b;
+      border: 1px solid #e2e8f0;
+    }
+
+    .note-box {
+      font-size: 0.74rem;
+      padding: 6px 9px;
+      border-radius: 5px;
+      line-height: 1.35;
+      display: flex;
+      gap: 6px;
+      align-items: flex-start;
+      margin-top: 5px;
+    }
+    .note-box.manual {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-left: 3px solid #3b82f6;
+      color: #1e293b;
+    }
+    .note-box.ai {
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      border-left: 3px solid #0284c7;
+      color: #0369a1;
+    }
+    .note-tag {
+      font-weight: 800;
+      font-size: 0.7rem;
+      flex-shrink: 0;
+    }
+    .note-text {
+      flex: 1;
+      word-break: break-word;
+    }
+
+    .chip-meeting {
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: #e0e7ff;
+      color: #3730a3;
+      border: 1px solid #c7d2fe;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .chip-ai {
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: #0284c7;
+      padding: 1px 4px;
+    }
+
+    /* Day Inspector Panel */
+    .inspector-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-elevated);
+      padding: 24px;
+      position: sticky;
+      top: 24px;
+    }
+    .inspector-header {
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 16px;
+      margin-bottom: 18px;
+    }
+    .inspector-date-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 4px;
+    }
+    .inspector-date-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--text-heading);
+      margin: 0;
+    }
+    .inspector-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 18px;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 12px;
+    }
+    .inspector-tab-btn {
+      flex: 1;
+      padding: 7px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-core);
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+    .inspector-tab-btn.active {
+      background: #e0f2fe;
+      color: var(--accent-cyan);
+      border-color: var(--accent-cyan);
+    }
+
+    /* Checklist Item Cards in Inspector */
+    .inspector-items-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 520px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .ins-item-card {
+      background: var(--bg-core);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .ins-item-card.is-done {
+      background: #f0fdf4;
+      border-color: #bbf7d0;
+    }
+    .ins-item-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .ins-item-num {
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      background: #e0f2fe;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .ins-item-status-pill {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+    .ins-item-status-pill.done {
+      background: #d1fae5;
+      color: #047857;
+    }
+    .ins-item-status-pill.pending {
+      background: #f1f5f9;
+      color: #64748b;
+    }
+    .ins-item-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-heading);
+      line-height: 1.35;
+    }
+    .ins-item-feedback {
+      font-size: 0.78rem;
+      color: var(--text-main);
+      background: #ffffff;
+      padding: 6px 10px;
+      border-radius: 4px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* Meeting Cards in Inspector */
+    .meeting-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      border-left: 4px solid #6366f1;
+    }
+    .meeting-time {
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: #4f46e5;
+    }
+    .meeting-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-heading);
+    }
+    .meeting-meta {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .mtg-company-chip {
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .mtg-company-chip.VFM { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+    .mtg-company-chip.VTS { background: #f3e8ff; color: #6b21a8; border: 1px solid #e9d5ff; }
+    .mtg-company-chip.CC { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+    .mtg-company-chip.Profox { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+
+    .mtg-topics-section {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 8px 10px;
+      margin-top: 6px;
+    }
+    .mtg-topics-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--text-heading);
+      cursor: pointer;
+      user-select: none;
+      padding: 2px 0;
+    }
+    .mtg-topics-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 8px;
+      max-height: 220px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .mtg-topic-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 0.75rem;
+      line-height: 1.35;
+      color: var(--text-main);
+      padding: 3px 0;
+      border-bottom: 1px dashed #f1f5f9;
+    }
+    .mtg-topic-scope {
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 1px 4px;
+      border-radius: 3px;
+      background: #f1f5f9;
+      color: #475569;
+    }
+    .mtg-feedback-box {
+      margin-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .mtg-feedback-textarea {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 6px 8px;
+      font-size: 0.78rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      font-family: inherit;
+      resize: vertical;
+      min-height: 50px;
+    }
+    .mtg-btn-save-feedback {
+      align-self: flex-end;
+      padding: 4px 10px;
+      background: #0284c7;
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    .mtg-btn-save-feedback:hover {
+      background: #0369a1;
+    }
+
+    .btn-schedule-meeting {
+      width: 100%;
+      padding: 10px;
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+      color: #ffffff;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-weight: 700;
+      font-size: 0.86rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 14px;
+      transition: all 0.2s ease;
+    }
+    .btn-schedule-meeting:hover {
+      background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+    }
+
+    /* Modal Form for Scheduling Meetings */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(15, 23, 42, 0.55);
+      backdrop-filter: blur(8px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .modal-card {
+      background: #ffffff;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 20px 40px rgba(15, 23, 42, 0.2);
+      width: 90%;
+      max-width: 500px;
+      padding: 24px 28px;
+    }
+
+    @media (max-width: 1024px) {
+      .calendar-layout {
+        grid-template-columns: 1fr;
+      }
+      .inspector-panel {
+        position: static;
+      }
+    }
+  </style>
+</head>
+<body class="light-theme">
+  <div class="app-container">
+    <!-- Top Executive Header -->
+    <header class="executive-header">
+      <div class="brand-group">
+        <div class="agent-avatar">
+          <div class="pulse-ring"></div>
+          <span class="avatar-icon">📅</span>
+        </div>
+        <div class="brand-text">
+          <div class="badge-row">
+            <span class="badge badge-glow">EXECUTIVE CALENDAR HUB</span>
+            <span class="badge badge-schedule">DAILY AUDITS & EXECUTIVE MEETINGS</span>
+          </div>
+          <h1>Operations & Meeting Calendar</h1>
+          <p class="subtitle">Complete monthly history of Daily 10:30 AM Routine Task Completions & Scheduled Executive Meetings</p>
+        </div>
+      </div>
+
+      <div class="header-status-panel">
+        <button id="btn-theme-toggle" class="btn-theme-toggle" title="Toggle Light / Dark Mode" aria-label="Toggle Theme">
+          <span class="theme-icon" id="theme-icon">🌙</span>
+          <span class="theme-text" id="theme-text">Dark Mode</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Navigation Bar -->
+    <nav class="nav-bar-row">
+      <div class="nav-links">
+        <a href="/" class="nav-link">🏠 Home Portal</a>
+        <a href="/checklist" class="nav-link">📋 Daily Checklist</a>
+        <a href="/audit" class="nav-link">🧠 Agent AI Summary</a>
+        <a href="/calendar" class="nav-link active">📅 Operations Calendar</a>
+        <a href="/meetings" class="nav-link">🤝 Executive Meetings</a>
+      </div>
+      <div class="cal-stats-strip">
+        <span class="stat-pill pill-blue" id="stat-recorded-days">📋 -- Recorded Days</span>
+        <span class="stat-pill pill-green" id="stat-completed-days">✅ -- Fully Completed</span>
+        <span class="stat-pill pill-amber" id="stat-meetings-count">🤝 -- Scheduled Meetings</span>
+      </div>
+    </nav>
+
+    <!-- Two-Column Calendar Layout -->
+    <div class="calendar-layout">
+      <!-- Main Calendar Card -->
+      <section class="cal-card">
+        <div class="cal-header-bar">
+          <div class="cal-month-title-group">
+            <h2 class="cal-month-title" id="cal-month-label">Loading Month...</h2>
+            <div class="cal-nav-btn-group">
+              <button class="cal-nav-btn" id="btn-prev-month" title="Previous Month">◀</button>
+              <button class="cal-today-btn" id="btn-today">Today</button>
+              <button class="cal-nav-btn" id="btn-next-month" title="Next Month">▶</button>
+            </div>
+          </div>
+          <div style="font-size: 0.84rem; color: var(--text-muted);">
+            Click any date cell to inspect tasks breakdown & scheduled meetings.
+          </div>
+        </div>
+
+        <!-- Weekdays Row -->
+        <div class="cal-grid-weekdays">
+          <div class="cal-weekday-header">Sun</div>
+          <div class="cal-weekday-header">Mon</div>
+          <div class="cal-weekday-header">Tue</div>
+          <div class="cal-weekday-header">Wed</div>
+          <div class="cal-weekday-header">Thu</div>
+          <div class="cal-weekday-header">Fri</div>
+          <div class="cal-weekday-header">Sat</div>
+        </div>
+
+        <!-- Days Grid -->
+        <div class="cal-grid-days" id="cal-days-grid">
+          <!-- Dynamically populated via calendar.js -->
+        </div>
+      </section>
+
+      <!-- Right Day Inspector Panel -->
+      <aside class="inspector-panel">
+        <div class="inspector-header">
+          <div class="inspector-date-label">INSPECTING DATE</div>
+          <h3 class="inspector-date-title" id="ins-date-title">Select a date</h3>
+          <div id="ins-progress-bar-wrap" style="margin-top: 12px; display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; font-weight: 700; margin-bottom: 5px;">
+              <span style="color: var(--text-muted); font-size: 0.75rem;">Audit Progress</span>
+              <span id="ins-progress-text" style="color: var(--text-heading); font-family: var(--font-mono); font-size: 0.76rem; font-weight: 700;">👤 0/8 • 🤖 0/8</span>
+            </div>
+            <div style="width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
+              <div id="ins-progress-fill" style="height: 100%; width: 0%; background: linear-gradient(90deg, #0284c7 0%, #10b981 100%); transition: width 0.3s ease;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabs: Checklist vs Meetings -->
+        <div class="inspector-tabs">
+          <button class="inspector-tab-btn active" id="tab-btn-tasks">📋 Tasks (<span id="count-ins-tasks">0</span>)</button>
+          <button class="inspector-tab-btn" id="tab-btn-meetings">🤝 Meetings (<span id="count-ins-meetings">0</span>)</button>
+        </div>
+
+        <!-- Tab 1: Checklist Tasks -->
+        <div id="tab-pane-tasks" style="display: block;">
+          <div id="ins-items-list" class="inspector-items-list">
+            <div style="text-align: center; padding: 30px; color: var(--text-muted); font-size: 0.88rem;">
+              Click on any day cell in the calendar to view its 8 audit tasks.
+            </div>
+          </div>
+          <div style="margin-top: 16px; display: flex; gap: 8px;">
+            <a id="btn-open-checklist-page" href="/checklist" class="cal-nav-btn" style="flex: 1; text-align: center; text-decoration: none; justify-content: center;">
+              📋 Open in Checklist
+            </a>
+            <a id="btn-open-audit-page" href="/audit" class="cal-nav-btn" style="flex: 1; text-align: center; text-decoration: none; justify-content: center;">
+              🧠 AI Briefing
+            </a>
+          </div>
+        </div>
+
+        <!-- Tab 2: Meetings & Events (View Only) -->
+        <div id="tab-pane-meetings" style="display: none;">
+          <div id="ins-meetings-list" style="display: flex; flex-direction: column; gap: 10px; max-height: 480px; overflow-y: auto;">
+            <!-- Populated via calendar.js -->
+          </div>
+          <div style="margin-top: 14px;">
+            <a id="btn-open-meetings-portal" href="/meetings" class="cal-today-btn" style="display: flex; text-align: center; justify-content: center; text-decoration: none; font-size: 0.88rem; padding: 10px 14px;">
+              🤝 Open Executive Meetings Desk
+            </a>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script src="/static/calendar.js?v=20261013_v3"></script>
+</body>
+</html>

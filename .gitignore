@@ -1,0 +1,139 @@
+# =============================================================================
+# ENVIRONMENT & SECRETS
+# =============================================================================
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.cert
+*.crt
+
+# =============================================================================
+# RUNTIME LOGS & SYNCED TELEMETRY DATA (Auto-generated from MongoDB)
+# =============================================================================
+local_db/
+logs/
+*.jsonl
+data/daily_routines/
+data/ai_reports/
+data/call_logs/
+data/email_previews/
+data/meetings/
+# Keep authentication credentials file for login on deployment system
+!data/auth_users.json
+
+# =============================================================================
+# UNNECESSARY SPECIFICATION & DESIGN MARKDOWN FILES
+# =============================================================================
+AGENT_REQUIREMENTS.md
+ARCHITECTURE.md
+FLUTTER_AGENT_DESIGN_SYSTEM.md
+REACT_VITE_MD_ROBOTIC_AGENT_DESIGN.md
+TEST_CASES.md
+vfm-roles.md
+
+# =============================================================================
+# PYTHON
+# =============================================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Python Virtual Environments
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+
+# =============================================================================
+# NODE & JAVASCRIPT (REACT / VITE)
+# =============================================================================
+node_modules/
+**/node_modules/
+react_vite/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Production Build Output
+react_vite/dist/
+react_vite/dist-ssr/
+dist/
+build/
+*.local
+
+# =============================================================================
+# TEMPORARY RUNTIME FILES
+# =============================================================================
+*.log
+*.tmp
+*.temp
+
+# =============================================================================
+# IDE & EDITOR ARTIFACTS
+# =============================================================================
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.bak
+
+# =============================================================================
+# OS ARTIFACTS
+# =============================================================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+[Dd]esktop.ini
+
+# =============================================================================
+# AGENT / SYSTEM GENERATED
+# =============================================================================
+.gemini/
