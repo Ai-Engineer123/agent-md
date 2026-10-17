@@ -1,0 +1,8 @@
+# Caddy configuration for md.agent.com & Local LAN access
+http://md.agent.com, :80 {
+	# Backend API endpoints -> Python FastAPI
+	reverse_proxy /api/* localhost:8000
+
+	# Frontend React App -> Vite Dev Server
+	reverse_proxy localhost:5173
+}

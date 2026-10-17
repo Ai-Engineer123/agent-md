@@ -4345,13 +4345,13 @@ li {
   color: #991B1B;
 }
 
-.heading-inspect-btn.vfm {
+.heading-inspect-btn.vfms {
   background: #ffedd5;
   color: #ff914d;
   border-color: #fed7aa;
 }
 
-.heading-inspect-btn.vfm:hover {
+.heading-inspect-btn.vfms:hover {
   background: #fed7aa;
   color: #e07d3b;
 }
@@ -5182,7 +5182,7 @@ select option {
   white-space: nowrap;
 }
 
-.meeting-company-badge.vfm {
+.meeting-company-badge.vfms {
   background: #EFF6FF;
   color: #1D4ED8;
   border: 1px solid #BFDBFE;
@@ -8406,7 +8406,7 @@ select option {
   line-height: 1.2;
 }
 
-.cal-co-count-pill.pill-vfm {
+.cal-co-count-pill.pill-vfms {
   background: #EFF6FF;
   border: 1px solid #BFDBFE;
   color: #1D4ED8;
@@ -9082,7 +9082,7 @@ select option {
   letter-spacing: 0.02em;
 }
 
-.popover-co-badge.badge-vfm {
+.popover-co-badge.badge-vfms {
   background: #ffedd5;
   color: #ff914d;
   border: 1px solid #fed7aa;
@@ -9662,7 +9662,7 @@ select option {
   letter-spacing: 0.03em;
 }
 
-.company-pill-badge.badge-vfm {
+.company-pill-badge.badge-vfms {
   background: #ffedd5;
   color: #ff914d;
   border: 1px solid #fed7aa;
@@ -11055,4 +11055,4 @@ select option {
 
 .exec-profile-logout-btn:hover svg {
   transform: translateX(1.5px);
-}
+}

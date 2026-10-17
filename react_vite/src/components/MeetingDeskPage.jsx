@@ -74,7 +74,14 @@ export function MeetingDeskPage({
       });
       if (res.ok) {
         const data = await res.json();
-        setTodayTopics(data.topics || []);
+        const serverTopics = data.topics || [];
+        setTodayTopics((prev) => {
+          const localMap = Object.fromEntries(prev.map((t) => [t.id, t.completed]));
+          return serverTopics.map((t) => ({
+            ...t,
+            completed: localMap[t.id] !== undefined ? localMap[t.id] : t.completed
+          }));
+        });
         setNewTopicTitle('');
       } else {
         console.error('Failed to save agenda topic to backend API');
@@ -192,11 +199,36 @@ export function MeetingDeskPage({
   }, [meetingId]);
 
   // Toggle today's agenda topic
-  const handleToggleTopic = (topicId) => {
+  const handleToggleTopic = async (topicId) => {
     playMechanicalClick();
+    const target = todayTopics.find((t) => t.id === topicId);
+    if (!target) return;
+    const nextCompleted = !target.completed;
+
+    // Optimistic UI update
     setTodayTopics((prev) =>
-      prev.map((t) => (t.id === topicId ? { ...t, completed: !t.completed } : t))
+      prev.map((t) => (t.id === topicId ? { ...t, completed: nextCompleted } : t))
     );
+
+    // Persist immediately to backend
+    try {
+      const res = await fetch(`/api/meetings/${meetingId}/topics/${topicId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          completed: nextCompleted,
+          updated_by: currentUser?.name || 'Managing Director'
+        })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.topics) {
+          setTodayTopics(data.topics);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to sync topic completion to backend:', err);
+    }
   };
 
   // Toggle opening follow-up query

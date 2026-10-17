@@ -59,7 +59,13 @@ VTS_MONGODB_URI = os.getenv(
 )
 VTS_MONGODB_READ_ONLY = True
 
-# 6. Ollama Cloud AI Settings
-OLLAMA_HOST = os.getenv("OLLAMA_HOST", "https://ollama.com")
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "gpt-oss:120b")
-OLLAMA_API_KEY = os.getenv("OLLAMA_API_KEY", "7c368832480741f0bf0e38700fc164e9.cyWjm8tTu3G2xtA9LgBL4Ein")
+# 6. Ollama AI Settings
+# Cloud Configuration (Preserved for future use - uncomment when needed):
+# OLLAMA_HOST = os.getenv("OLLAMA_HOST", "https://ollama.com")
+# OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "gpt-oss:120b")
+# OLLAMA_API_KEY = os.getenv("OLLAMA_API_KEY", "7c368832480741f0bf0e38700fc164e9.cyWjm8tTu3G2xtA9LgBL4Ein")
+
+# Local Ollama (Default: Offline & Private):
+OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://127.0.0.1:11434")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "deepseek-r1:8b")
+OLLAMA_API_KEY = os.getenv("OLLAMA_API_KEY", "")

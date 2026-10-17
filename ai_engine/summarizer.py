@@ -266,6 +266,7 @@ def build_executive_prompt(metrics_payload: dict) -> tuple:
     t5 = metrics_payload.get("tasks", {}).get("task_5", {})
     t6 = metrics_payload.get("tasks", {}).get("task_6", {})
     t7 = metrics_payload.get("tasks", {}).get("task_7", {})
+    t8 = metrics_payload.get("tasks", {}).get("task_8", {})
     date_str = metrics_payload.get('date', 'Today')
 
     danger_tickets_cnt = t6.get('total_danger_tickets_overdue_3_days', 0)
@@ -306,7 +307,7 @@ def build_executive_prompt(metrics_payload: dict) -> tuple:
         "   - The bank balance net banking inspection warning.\n"
         f"4. In Section 4 (Tickets), highlight the {danger_tickets_cnt} Danger tickets (>3 days unresolved) and issue sharp escalation directives.\n"
         f"5. In Section 5 (DMR), highlight {dmr_sub} submitted vs {dmr_pen} pending FMS sites ({dmr_comp}% compliance) out of {dmr_tot} total active FMS sites (DMR reports are strictly applicable ONLY to FMS sites, out of {t7.get('total_all_sites_in_system', 88)} total sites in system) with operational suggestions.\n"
-        f"6. In Section 6 (Planned Maintenance & Asset Reliability), explicitly report: Current Week ({t8_m.get('current_week_number', 42)}) operational tasks: {t8_m.get('total_tasks_this_week', 25)}; Yesterday ({t8_m.get('yesterday_weekday', 'Thursday')}) completed/submitted: {t8_m.get('yesterday_completed_tasks', 4)} tasks; Today ({t8_m.get('today_weekday', 'Friday')}) active/planned: {t8_m.get('today_total_tasks', 2)} tasks across {t8_m.get('total_critical_assets_tracked', 61)} facility assets with decisive MD directives.\n"
+        f"6. In Section 6 (Planned Maintenance & Asset Reliability), explicitly report: Current Week ({t8.get('current_week_number', 42)}) operational tasks: {t8.get('total_tasks_this_week', 25)}; Yesterday ({t8.get('yesterday_weekday', 'Thursday')}) completed/submitted: {t8.get('yesterday_completed_tasks', 4)} tasks; Today ({t8.get('today_weekday', 'Friday')}) active/planned: {t8.get('today_total_tasks', 2)} tasks across {t8.get('total_critical_assets_tracked', 61)} facility assets with decisive MD directives.\n"
         "7. In Section 7 (Manual Checks), provide direct instructions for Task 2 (Director/GM/Vacancy) and Task 4 (Emails).\n"
         "8. Provide strategic MD-level suggestions and directives for EVERY section.\n"
         "9. Absolutely NO trailing recap checklist or checkboxes at the end. End after Section 7."

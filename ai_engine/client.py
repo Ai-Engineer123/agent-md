@@ -27,9 +27,15 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DEFAULT_OLLAMA_HOST = os.getenv("OLLAMA_HOST", "https://ollama.com").rstrip("/")
-DEFAULT_OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "gpt-oss:120b")
-DEFAULT_OLLAMA_API_KEY = os.getenv("OLLAMA_API_KEY", "7c368832480741f0bf0e38700fc164e9.cyWjm8tTu3G2xtA9LgBL4Ein")
+# --- Cloud Ollama Configuration (Preserved for future use - uncomment when needed) ---
+# DEFAULT_OLLAMA_HOST = os.getenv("OLLAMA_HOST", "https://ollama.com").rstrip("/")
+# DEFAULT_OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "gpt-oss:120b")
+# DEFAULT_OLLAMA_API_KEY = os.getenv("OLLAMA_API_KEY", "7c368832480741f0bf0e38700fc164e9.cyWjm8tTu3G2xtA9LgBL4Ein")
+
+# --- Local Ollama Configuration (Default: Offline & Private) ---
+DEFAULT_OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://127.0.0.1:11434").rstrip("/")
+DEFAULT_OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "deepseek-r1:8b")
+DEFAULT_OLLAMA_API_KEY = os.getenv("OLLAMA_API_KEY", "")
 
 class OllamaClient:
     """Universal client for interacting with Ollama and compatible LLM providers."""
