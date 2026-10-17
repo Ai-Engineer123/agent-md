@@ -25,7 +25,7 @@ import urllib.error
 from typing import Optional, Dict, Any
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(override=True)
 
 # --- Cloud Ollama Configuration (Preserved for future use - uncomment when needed) ---
 # DEFAULT_OLLAMA_HOST = os.getenv("OLLAMA_HOST", "https://ollama.com").rstrip("/")
@@ -80,9 +80,12 @@ class OllamaClient:
             req = urllib.request.Request(url, data=req_data, headers=headers)
             with urllib.request.urlopen(req, timeout=timeout) as res:
                 data = json.loads(res.read().decode("utf-8"))
+                raw_response = data.get("response", "")
+                import re
+                clean_response = re.sub(r'<think>[\s\S]*?</think>', '', raw_response).strip()
                 return {
                     "success": True,
-                    "response": data.get("response", ""),
+                    "response": clean_response,
                     "model": data.get("model", self.model),
                     "total_duration": data.get("total_duration"),
                     "eval_count": data.get("eval_count")

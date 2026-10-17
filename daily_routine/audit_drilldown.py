@@ -19,13 +19,13 @@ LOCAL_DB_DIR = BASE_DIR / "local_db"
 logger = logging.getLogger(__name__)
 
 def resolve_target_date(date_str: str = None) -> str:
-    """Finds the best date folder in local_db."""
+    """Finds the date folder in local_db.
+    Strictly date-based: If date_str is provided, returns date_str directly.
+    Only defaults to today or newest folder if date_str is None."""
     if date_str:
-        target_path = LOCAL_DB_DIR / date_str
-        if target_path.exists():
-            return date_str
+        return date_str
             
-    # Default to today or most recent date folder
+    # Default to today or most recent date folder if no date requested
     today = datetime.now().strftime("%Y-%m-%d")
     if (LOCAL_DB_DIR / today).exists():
         return today
@@ -35,6 +35,7 @@ def resolve_target_date(date_str: str = None) -> str:
         return available[0]
         
     return today
+
 
 def get_audit_drilldown_data(date_str: str = None) -> dict:
     """

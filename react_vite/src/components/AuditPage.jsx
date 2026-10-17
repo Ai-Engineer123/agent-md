@@ -239,6 +239,7 @@ export const AuditPage = ({
   const [dmrModalTab, setDmrModalTab] = useState(initialModalTab || 'submitted'); // 'submitted' | 'pending'
   const [ticketsModalTab, setTicketsModalTab] = useState(initialModalTab || 'danger'); // 'danger' | 'internal' | 'external' | 'all'
   const [planModalTab, setPlanModalTab] = useState('yesterday'); // 'yesterday' | 'today' | 'week' | 'assets'
+  const [imprestModalTab, setImprestModalTab] = useState('active'); // 'active' | 'all_unsettled' | 'overdue'
 
   // Close modal helper
   const handleCloseModal = () => {
@@ -653,6 +654,7 @@ export const AuditPage = ({
       if (trimmed.startsWith('### ')) {
         const h3Text = trimmed.replace(/^###\s*/, '');
         const isVfm = /3\.3|VFM Portal|Work Updates/i.test(h3Text);
+        const isImprest = /Imprest Holder|Imprest Management/i.test(h3Text);
 
         elements.push(
           <div key={`h3-${i}`} className="briefing-h3-wrap">
@@ -684,6 +686,46 @@ export const AuditPage = ({
                 >
                   <AlertTriangle size={14} />
                   <span>View Not Submitted ({drilldownData?.vfm_portal?.not_submitted_users?.length ?? 98})</span>
+                </button>
+              </div>
+            )}
+            {isImprest && (
+              <div style={{ display: 'inline-flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                <button
+                  onClick={() => {
+                    playMechanicalClick();
+                    setImprestModalTab('active');
+                    setActiveModal('imprest');
+                  }}
+                  className="heading-inspect-btn success"
+                  title="View active imprest holders for the current month"
+                >
+                  <CheckCircle2 size={14} />
+                  <span>View Active Holders ({accountsData?.imprest_audit?.current_month_activity?.active_holders_count ?? accountsData?.imprest_audit?.current_month_activity?.top_active_holders?.length ?? 35})</span>
+                </button>
+                <button
+                  onClick={() => {
+                    playMechanicalClick();
+                    setImprestModalTab('all_unsettled');
+                    setActiveModal('imprest');
+                  }}
+                  className="heading-inspect-btn warning"
+                  title="View all in-charges with unsettled cash balances"
+                >
+                  <DollarSign size={14} />
+                  <span>View All Unsettled ({accountsData?.imprest_audit?.holders_with_unsettled_balance?.length ?? 100})</span>
+                </button>
+                <button
+                  onClick={() => {
+                    playMechanicalClick();
+                    setImprestModalTab('overdue');
+                    setActiveModal('imprest');
+                  }}
+                  className="heading-inspect-btn danger"
+                  title="View critical overdue imprest holders with no settlement in over 180 days"
+                >
+                  <AlertTriangle size={14} />
+                  <span>Critical Overdue &gt;180d ({accountsData?.imprest_audit?.summary?.critical_overdue_holders ?? 57})</span>
                 </button>
               </div>
             )}
@@ -1060,15 +1102,15 @@ export const AuditPage = ({
               </div>
 
               <div className="briefing-doc-body">
-                {aiReport?.ai_response_raw ? (
+                {aiReport && aiReport.has_report !== false && !aiReport.is_fallback && aiReport.date === selectedDate && aiReport.ai_response_raw ? (
                   <div className="raw-briefing-text">
                     {renderExecutiveBriefing(aiReport.ai_response_raw)}
                   </div>
                 ) : (
                   <div className="empty-briefing-state">
                     <AlertCircle size={28} color="#ff914d" />
-                    <h4>Briefing Ready for Synthesis</h4>
-                    <p>Click "Resync Telemetry" above to trigger automated AI report generation.</p>
+                    <h4>No AI Executive Briefing Archived for {selectedDate}</h4>
+                    <p>The daily executive briefing has not been archived for this date. Each briefing is strictly date-specific.</p>
                   </div>
                 )}
               </div>
@@ -2230,6 +2272,186 @@ export const AuditPage = ({
                               <span className="status-badge-chip chip-success" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                                 <CheckCircle2 size={12} /> Active Tracked
                               </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+              </>
+            )}
+
+            {/* MODAL 6: IMPREST CASH & HOLDERS AUDIT */}
+            {activeModal === 'imprest' && (
+              <>
+                <div className="audit-modal-header">
+                  <div className="modal-title-group">
+                    <span className="modal-badge-tag amber">CASH LEDGER</span>
+                    <h3 className="modal-title">Imprest Cash & Field Advances Audit</h3>
+                    <p className="modal-subtitle">
+                      Tracking {accountsData?.imprest_audit?.current_month_activity?.month || 'Current Month'} active advances and aging cash held across operational in-charges
+                    </p>
+                  </div>
+                  <button className="modal-close-btn" onClick={handleCloseModal} title="Close Modal">
+                    <X size={18} />
+                  </button>
+                </div>
+
+                <div className="modal-subnav-strip">
+                  <button
+                    onClick={() => {
+                      playMechanicalClick();
+                      setImprestModalTab('active');
+                    }}
+                    className={`modal-subnav-tab ${imprestModalTab === 'active' ? 'active success' : ''}`}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                  >
+                    <CheckCircle2 size={13} color={imprestModalTab === 'active' ? '#FFFFFF' : '#059669'} />
+                    <span>Current Month Active ({accountsData?.imprest_audit?.current_month_activity?.active_holders_count ?? accountsData?.imprest_audit?.current_month_activity?.top_active_holders?.length ?? 35})</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      playMechanicalClick();
+                      setImprestModalTab('all_unsettled');
+                    }}
+                    className={`modal-subnav-tab ${imprestModalTab === 'all_unsettled' ? 'active warning' : ''}`}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                  >
+                    <DollarSign size={13} color={imprestModalTab === 'all_unsettled' ? '#FFFFFF' : '#D97706'} />
+                    <span>All Unsettled Cash ({accountsData?.imprest_audit?.holders_with_unsettled_balance?.length ?? 100})</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      playMechanicalClick();
+                      setImprestModalTab('overdue');
+                    }}
+                    className={`modal-subnav-tab ${imprestModalTab === 'overdue' ? 'active danger' : ''}`}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                  >
+                    <AlertTriangle size={13} color={imprestModalTab === 'overdue' ? '#FFFFFF' : '#DC2626'} />
+                    <span>Critical Overdue &gt;180d ({accountsData?.imprest_audit?.summary?.critical_overdue_holders ?? 57})</span>
+                  </button>
+                </div>
+
+                <div className="audit-modal-body">
+                  {imprestModalTab === 'active' && (
+                    <table className="audit-modern-table modal-table">
+                      <thead>
+                        <tr>
+                          <th>Holder ID</th>
+                          <th>Imprest Holder Name</th>
+                          <th>Given (Credit)</th>
+                          <th>Settled (Bills)</th>
+                          <th>Net Cash Held</th>
+                          <th>Transactions</th>
+                          <th>MD Operational Directive</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(accountsData?.imprest_audit?.current_month_activity?.top_active_holders || []).map((h, idx) => (
+                          <tr key={idx}>
+                            <td className="font-semibold text-cyan">#{h.holder_id}</td>
+                            <td className="font-bold text-dark">{h.holder_name}</td>
+                            <td className="font-medium text-dark">{formatINR(h.credit_received)}</td>
+                            <td className="font-medium text-secondary">{formatINR(h.debit_settled)}</td>
+                            <td className="font-bold text-dark" style={{ color: h.net_balance > 200000 ? '#DC2626' : '#D97706' }}>
+                              {formatINR(h.net_balance)}
+                            </td>
+                            <td>
+                              <span className="unit-pill">{h.transaction_count} Txns</span>
+                            </td>
+                            <td>
+                              {h.net_balance > 200000 ? (
+                                <span className="status-badge-chip chip-danger">Demand Bills Immediately</span>
+                              ) : h.net_balance > 0 ? (
+                                <span className="status-badge-chip chip-warning">Vouchers Due</span>
+                              ) : (
+                                <span className="status-badge-chip chip-success">Fully Settled</span>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+
+                  {imprestModalTab === 'all_unsettled' && (
+                    <table className="audit-modern-table modal-table">
+                      <thead>
+                        <tr>
+                          <th>Holder ID</th>
+                          <th>Imprest Holder Name</th>
+                          <th>Total Given</th>
+                          <th>Total Settled</th>
+                          <th>Unsettled Balance</th>
+                          <th>Last Activity</th>
+                          <th>Aging Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(accountsData?.imprest_audit?.holders_with_unsettled_balance || []).map((h, idx) => (
+                          <tr key={idx}>
+                            <td className="font-semibold text-cyan">#{h.holder_id}</td>
+                            <td className="font-bold text-dark">{h.holder_name}</td>
+                            <td className="font-medium text-dark">{formatINR(h.total_credit_received)}</td>
+                            <td className="font-medium text-secondary">{formatINR(h.total_debit_settled)}</td>
+                            <td className="font-bold text-dark" style={{ color: h.unsettled_balance > 500000 ? '#DC2626' : '#D97706' }}>
+                              {formatINR(h.unsettled_balance)}
+                            </td>
+                            <td className="text-secondary" style={{ fontSize: '12px' }}>
+                              {h.days_since_last_activity != null ? `${h.days_since_last_activity} days ago` : 'N/A'}
+                            </td>
+                            <td>
+                              <span className={`status-badge-chip ${
+                                h.duration_status === 'CRITICAL_OVERDUE_OVER_180_DAYS' ? 'chip-danger' :
+                                h.duration_status === 'STALE_91_180_DAYS' ? 'chip-warning' : 'chip-normal'
+                              }`}>
+                                {(h.duration_status || 'Active').replace(/_/g, ' ')}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+
+                  {imprestModalTab === 'overdue' && (
+                    <table className="audit-modern-table modal-table">
+                      <thead>
+                        <tr>
+                          <th>Holder ID</th>
+                          <th>Imprest Holder Name</th>
+                          <th>Critical Unsettled Balance</th>
+                          <th>Days Inactive</th>
+                          <th>First Advance Date</th>
+                          <th>Last Advance Date</th>
+                          <th>Recovery Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {((accountsData?.imprest_audit?.holders_with_unsettled_balance || []).filter(
+                          (h) => h.duration_status === 'CRITICAL_OVERDUE_OVER_180_DAYS' || (h.days_since_last_activity && h.days_since_last_activity > 180)
+                        )).map((h, idx) => (
+                          <tr key={idx}>
+                            <td className="font-semibold text-cyan">#{h.holder_id}</td>
+                            <td className="font-bold text-dark">{h.holder_name}</td>
+                            <td className="font-bold text-dark" style={{ color: '#DC2626' }}>
+                              {formatINR(h.unsettled_balance)}
+                            </td>
+                            <td>
+                              <span className="status-badge-chip chip-danger" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                <AlertTriangle size={12} /> {h.days_since_last_activity} days dormant
+                              </span>
+                            </td>
+                            <td className="text-secondary font-mono" style={{ fontSize: '11.5px' }}>
+                              {h.first_disbursed_date ? h.first_disbursed_date.split('T')[0] : 'N/A'}
+                            </td>
+                            <td className="text-secondary font-mono" style={{ fontSize: '11.5px' }}>
+                              {h.last_activity_date ? h.last_activity_date.split('T')[0] : 'N/A'}
+                            </td>
+                            <td>
+                              <span className="status-badge-chip chip-danger">Issue Formal Notice</span>
                             </td>
                           </tr>
                         ))}

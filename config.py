@@ -29,7 +29,7 @@ if _env_file.exists():
             if _line and not _line.startswith("#") and "=" in _line:
                 _k, _v = _line.split("=", 1)
                 _k, _v = _k.strip(), _v.strip()
-                if _k and _k not in os.environ:
+                if _k:
                     os.environ[_k] = _v
 
 # 3. Schedule Settings
