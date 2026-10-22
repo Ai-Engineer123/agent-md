@@ -278,11 +278,17 @@ export const AuditPage = ({
   const [dmrData, setDmrData] = useState(null);
   const [planData, setPlanData] = useState(null);
 
-  // 12-hour AM/PM Formatter
+  // 12-hour AM/PM Formatter (with UTC -> Local IST awareness)
   const format12HourTime = (date) => {
     if (!date) return '';
-    const d = new Date(date);
-    if (isNaN(d.getTime())) return '';
+    let val = String(date).trim();
+    if (/\b(AM|PM)\b/i.test(val)) return val;
+    // If naive ISO string from MongoDB UTC without 'Z' or offset, treat as UTC so browser converts to local IST
+    if (val.includes('T') && !val.endsWith('Z') && !/\+\d{2}:\d{2}$/.test(val) && !/-\d{2}:\d{2}$/.test(val)) {
+      val = val + 'Z';
+    }
+    const d = new Date(val);
+    if (isNaN(d.getTime())) return String(date);
     let h = d.getHours();
     const m = String(d.getMinutes()).padStart(2, '0');
     const s = String(d.getSeconds()).padStart(2, '0');
@@ -295,12 +301,12 @@ export const AuditPage = ({
   const formatDateTimeDisplay = (isoStr) => {
     if (!isoStr) return null;
     try {
-      const cleanStr = String(isoStr).replace('Z', '').split('.')[0];
-      const parts = cleanStr.split('T');
-      const datePart = parts[0];
-
-      const d = new Date(isoStr);
-      let dateFormatted = datePart;
+      let val = String(isoStr).trim();
+      if (val.includes('T') && !val.endsWith('Z') && !/\+\d{2}:\d{2}$/.test(val) && !/-\d{2}:\d{2}$/.test(val)) {
+        val = val + 'Z';
+      }
+      const d = new Date(val);
+      let dateFormatted = String(isoStr).split('T')[0];
       let dayName = '';
       if (!isNaN(d.getTime())) {
         const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];

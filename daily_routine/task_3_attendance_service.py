@@ -21,6 +21,7 @@ if r"C:\coding\python-packages" not in sys.path:
 import json
 from datetime import datetime
 from config import BASE_DIR
+from time_utils import to_ist_iso
 
 LOCAL_DB_DIR = BASE_DIR / "local_db"
 
@@ -41,6 +42,11 @@ def get_head_office_attendance(target_date: datetime = None) -> dict:
             with open(file_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
             data["source"] = "LOCAL_DB"
+            for s in data.get("staff_attendance", []):
+                if s.get("check_in_time"):
+                    s["check_in_time"] = to_ist_iso(s["check_in_time"])
+                if s.get("check_out_time"):
+                    s["check_out_time"] = to_ist_iso(s["check_out_time"])
             return data
         except Exception as e:
             return {"error": f"Failed to read local file: {e}", "source": "LOCAL_DB"}
@@ -71,6 +77,11 @@ def get_company_incharges_attendance(target_date: datetime = None) -> dict:
             with open(file_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
             data["source"] = "LOCAL_DB"
+            for s in data.get("incharges", []):
+                if s.get("check_in_time"):
+                    s["check_in_time"] = to_ist_iso(s["check_in_time"])
+                if s.get("last_known_checkin"):
+                    s["last_known_checkin"] = to_ist_iso(s["last_known_checkin"])
             return data
         except Exception as e:
             return {"error": f"Failed to read local file: {e}", "source": "LOCAL_DB"}

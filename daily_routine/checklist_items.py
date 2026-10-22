@@ -20,6 +20,7 @@ if r"C:\coding\python-packages" not in sys.path:
 
 from datetime import datetime
 from jsonl_logger import log_event
+from time_utils import format_time_ampm, to_ist
 from .task_1_checkin_service import check_user_checkin, DEFAULT_ADMIN_EMP_NO
 from .document_store import save_daily_routine_document, load_daily_routine_document
 
@@ -45,27 +46,8 @@ def format_inr(amount) -> str:
         res = ",".join(groups) + "," + last3
     return f"{'-' if is_neg else ''}₹ {res}"
 
-def format_time_ampm(time_val) -> str:
-    """Formats an ISO timestamp or HH:MM string into 12-hour AM/PM format (e.g., 07:23 AM)"""
-    if not time_val:
-        return ""
-    try:
-        val_str = str(time_val).replace("Z", "").split("+")[0]
-        if "T" in val_str:
-            dt = datetime.fromisoformat(val_str.split(".")[0])
-            return dt.strftime("%I:%M %p")
-        elif ":" in val_str:
-            parts = val_str.split(":")
-            h = int(parts[0])
-            m = int(parts[1])
-            ampm = "PM" if h >= 12 else "AM"
-            h12 = h % 12
-            if h12 == 0:
-                h12 = 12
-            return f"{h12:02d}:{m:02d} {ampm}"
-    except Exception:
-        pass
-    return str(time_val)
+# format_time_ampm is globally handled by time_utils to guarantee accurate IST conversion
+# from any UTC/naive MongoDB timestamps.
 
 # ---------------------------------------------------------------------------
 # DEFAULT 8 DAILY ITEMS
@@ -243,7 +225,7 @@ class ChecklistManager:
                     item["auto_verified"] = True
                     item["completed_at"] = att.get("check_in_time")
                     if not item["feedback"]:
-                        time_part = att.get("check_in_time", "").split("T")[-1][:5]
+                        time_part = format_time_ampm(att.get("check_in_time", ""))
                         item["feedback"] = f"Auto-verified from DB: Checked in at {time_part} ({att.get('site', 'HEAD OFFICE')})"
                     log_event("AUTO_CHECKIN_VERIFIED", att)
                 break

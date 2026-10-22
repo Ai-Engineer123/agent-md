@@ -20,6 +20,7 @@ if r"C:\coding\python-packages" not in sys.path:
 import json
 from datetime import datetime
 from config import BASE_DIR
+from time_utils import to_ist_iso
 
 LOCAL_DB_DIR = BASE_DIR / "local_db"
 DEFAULT_ADMIN_EMP_NO = 1
@@ -47,16 +48,18 @@ def check_user_checkin(employee_number: int = DEFAULT_ADMIN_EMP_NO, target_date:
             with open(file_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
             
+            raw_checkin = data.get("check_in_time")
+            raw_last_known = data.get("last_known_checkin")
             return {
                 "checked_in": data.get("checked_in", False),
                 "is_today": True,
                 "employee_number": data.get("employee_number", employee_number),
                 "employee_name": data.get("employee_name", "S GANESAMOORTHY"),
-                "check_in_time": data.get("check_in_time"),
+                "check_in_time": to_ist_iso(raw_checkin) if raw_checkin else None,
                 "site": data.get("site") or data.get("last_known_site", "HEAD OFFICE"),
                 "role": data.get("role", "ADMIN"),
                 "status": data.get("status", "SYNCED"),
-                "last_known_checkin": data.get("last_known_checkin"),
+                "last_known_checkin": to_ist_iso(raw_last_known) if raw_last_known else None,
                 "source": "LOCAL_DB"
             }
         except Exception as e:

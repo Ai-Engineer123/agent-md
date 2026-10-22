@@ -13,6 +13,7 @@ from pathlib import Path
 from datetime import datetime
 import json
 import logging
+from time_utils import to_ist_iso
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 LOCAL_DB_DIR = BASE_DIR / "local_db"
@@ -173,8 +174,8 @@ def get_audit_drilldown_data(date_str: str = None) -> dict:
                         "employee_name": staff.get("employee_name"),
                         "role": staff.get("role", "Staff"),
                         "status": "PRESENT",
-                        "check_in_time": staff.get("check_in_time"),
-                        "last_known_checkin": staff.get("check_in_time")
+                        "check_in_time": to_ist_iso(staff.get("check_in_time")),
+                        "last_known_checkin": to_ist_iso(staff.get("check_in_time"))
                     })
         except Exception as e:
             logger.error(f"Error loading Head Office attendance drill-down: {e}")
@@ -202,7 +203,7 @@ def get_audit_drilldown_data(date_str: str = None) -> dict:
                             "employee_name": inc.get("employee_name"),
                             "role": inc.get("role", "In-charge"),
                             "status": "NOT_CHECKED_IN",
-                            "last_known_checkin": inc.get("last_known_checkin")
+                            "last_known_checkin": to_ist_iso(inc.get("last_known_checkin"))
                         })
                     elif st == "ON_LEAVE":
                         leave_info = inc.get("leave_details") or {}
@@ -216,9 +217,10 @@ def get_audit_drilldown_data(date_str: str = None) -> dict:
                             "leave_type": leave_info.get("leave_type", "Leave").replace("_", " ").title(),
                             "reason": leave_info.get("reason", "N/A"),
                             "approval_status": leave_info.get("status", "APPROVED"),
-                            "last_known_checkin": inc.get("last_known_checkin")
+                            "last_known_checkin": to_ist_iso(inc.get("last_known_checkin"))
                         })
                     elif st in ["PRESENT", "CHECKED_IN"]:
+                        raw_c = inc.get("check_in_time") or inc.get("last_known_checkin")
                         result["workforce"]["checked_in"].append({
                             "unit": f"Company In-Charge ({cname})",
                             "site_code": cname,
@@ -226,8 +228,8 @@ def get_audit_drilldown_data(date_str: str = None) -> dict:
                             "employee_name": inc.get("employee_name"),
                             "role": inc.get("role", "In-charge"),
                             "status": "PRESENT",
-                            "check_in_time": inc.get("check_in_time") or inc.get("last_known_checkin"),
-                            "last_known_checkin": inc.get("check_in_time") or inc.get("last_known_checkin")
+                            "check_in_time": to_ist_iso(raw_c),
+                            "last_known_checkin": to_ist_iso(raw_c)
                         })
         except Exception as e:
             logger.error(f"Error loading company incharges drill-down: {e}")

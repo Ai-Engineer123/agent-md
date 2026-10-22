@@ -18,6 +18,7 @@ if r"C:\coding\python-packages" not in sys.path:
 from datetime import datetime
 from bson import ObjectId
 from config import BASE_DIR
+from time_utils import to_ist_iso
 
 # Base local_db directory
 LOCAL_DB_DIR = BASE_DIR / "local_db"
@@ -49,5 +50,5 @@ def clean_for_json(obj):
     elif isinstance(obj, ObjectId):
         return str(obj)
     elif isinstance(obj, datetime):
-        return obj.isoformat()
+        return to_ist_iso(obj)
     return obj
