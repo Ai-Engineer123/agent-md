@@ -36,8 +36,27 @@ from .constants import (
 
 MEETINGS_DIR = BASE_DIR / "data" / "meetings"
 MEETINGS_DIR.mkdir(parents=True, exist_ok=True)
-MEETINGS_FILE = MEETINGS_DIR / "meetings.json"
 COMMON_AGENDA_FILE = MEETINGS_DIR / "common_agenda.json"
+
+
+def get_month_filename(month_num: Optional[int] = None) -> str:
+    """
+    Returns the month-based JSON filename in lowercase, e.g. 10 -> 'october.json'.
+    Defaults to current month if not provided.
+    """
+    if not month_num:
+        month_num = datetime.now().month
+    month_name = calendar.month_name[month_num].lower()
+    return f"{month_name}.json"
+
+
+def get_month_file_path(month_num: Optional[int] = None) -> Path:
+    """Returns Path for data/meetings/<month>.json."""
+    return MEETINGS_DIR / get_month_filename(month_num)
+
+
+# Module-level alias for backward compatibility (points to current month json, e.g. data/meetings/october.json)
+MEETINGS_FILE = get_month_file_path()
 
 
 # ---------------------------------------------------------------------------
@@ -232,31 +251,65 @@ _meetings_lock = threading.RLock()
 _in_memory_meetings_cache: Optional[List[Dict[str, Any]]] = None
 
 
-def load_all_meetings() -> List[Dict[str, Any]]:
-    """Loads all scheduled executive meetings from local storage with thread safety and transient retry."""
+def load_all_meetings(target_month: Optional[int] = None) -> List[Dict[str, Any]]:
+    """
+    Loads all scheduled executive meetings from month-specific JSON files in data/meetings/.
+    Examples:
+      - data/meetings/october.json
+      - data/meetings/november.json
+    - If target_month is provided, loads specifically from that month's JSON file.
+    - If target_month is None, loads and merges across all month JSON files in data/meetings/.
+    Thread-safe with retry protection against transient file locks.
+    """
     global _in_memory_meetings_cache
 
     with _meetings_lock:
-        if not MEETINGS_FILE.exists():
+        target_files: List[Path] = []
+        if target_month:
+            mf = get_month_file_path(target_month)
+            if mf.exists():
+                target_files.append(mf)
+        else:
+            # Discover all month JSON files in data/meetings/ (e.g. october.json, november.json, etc.)
+            if MEETINGS_DIR.exists():
+                for p in MEETINGS_DIR.glob("*.json"):
+                    if p.name != "common_agenda.json" and not p.name.endswith(".tmp"):
+                        target_files.append(p)
+
+            # Fallback to current month if no files exist yet
+            if not target_files:
+                curr_mf = get_month_file_path()
+                if curr_mf.exists():
+                    target_files.append(curr_mf)
+
+        if not target_files:
             return _in_memory_meetings_cache or []
 
-        # Retry up to 3 times to prevent transient Windows file-lock / write collisions
-        for attempt in range(3):
-            try:
-                with open(MEETINGS_FILE, "r", encoding="utf-8") as f:
-                    data = json.load(f)
-                    if isinstance(data, list) and len(data) > 0:
-                        sorted_list = sort_meetings_by_datetime(data)
-                        _in_memory_meetings_cache = sorted_list
-                        return sorted_list
-                    elif isinstance(data, list) and len(data) == 0:
-                        if _in_memory_meetings_cache and len(_in_memory_meetings_cache) > 0:
-                            return _in_memory_meetings_cache
-                        return []
-            except (json.JSONDecodeError, PermissionError, OSError):
-                time.sleep(0.04)
-            except Exception:
-                break
+        all_loaded = []
+        seen_ids = set()
+
+        for fpath in target_files:
+            for attempt in range(3):
+                try:
+                    with open(fpath, "r", encoding="utf-8") as f:
+                        data = json.load(f)
+                        if isinstance(data, list):
+                            for m in data:
+                                if isinstance(m, dict) and m.get("id"):
+                                    if m["id"] not in seen_ids:
+                                        m["_source_file"] = fpath.name
+                                        seen_ids.add(m["id"])
+                                        all_loaded.append(m)
+                            break
+                except (json.JSONDecodeError, PermissionError, OSError):
+                    time.sleep(0.04)
+                except Exception:
+                    break
+
+        if all_loaded:
+            sorted_list = sort_meetings_by_datetime(all_loaded)
+            _in_memory_meetings_cache = sorted_list
+            return sorted_list
 
         if _in_memory_meetings_cache and len(_in_memory_meetings_cache) > 0:
             return _in_memory_meetings_cache
@@ -264,8 +317,11 @@ def load_all_meetings() -> List[Dict[str, Any]]:
         return []
 
 
-def save_all_meetings(meetings: List[Dict[str, Any]]) -> bool:
-    """Saves meetings list safely using atomic replace and thread locking."""
+def save_all_meetings(meetings: List[Dict[str, Any]], target_month: Optional[int] = None) -> bool:
+    """
+    Saves meetings safely partitioned into month JSON files (e.g., october.json, november.json).
+    Uses atomic replace (.tmp -> replace) and thread locking.
+    """
     global _in_memory_meetings_cache
 
     with _meetings_lock:
@@ -276,26 +332,55 @@ def save_all_meetings(meetings: List[Dict[str, Any]]) -> bool:
             sorted_meetings = sort_meetings_by_datetime(meetings)
             _in_memory_meetings_cache = sorted_meetings
 
-            temp_file = MEETINGS_FILE.with_suffix(".json.tmp")
-            with open(temp_file, "w", encoding="utf-8") as f:
-                json.dump(sorted_meetings, f, indent=2, ensure_ascii=False)
-                f.flush()
-                os.fsync(f.fileno())
+            # Partition meetings by their destination month file
+            files_map: Dict[str, List[Dict[str, Any]]] = {}
 
-            temp_file.replace(MEETINGS_FILE)
+            if target_month:
+                target_filename = get_month_filename(target_month)
+                files_map[target_filename] = sorted_meetings
+            else:
+                for m in sorted_meetings:
+                    dest_file = m.get("_source_file")
+                    if not dest_file or dest_file == "meetings.json":
+                        d_str = m.get("date", "")
+                        try:
+                            m_idx = int(d_str.split("-")[1])
+                            dest_file = get_month_filename(m_idx)
+                        except Exception:
+                            dest_file = get_month_filename()
+
+                    files_map.setdefault(dest_file, []).append(m)
+
+            for filename, group in files_map.items():
+                dest_path = MEETINGS_DIR / filename
+                clean_group = []
+                for item in group:
+                    clean_group.append({k: v for k, v in item.items() if not k.startswith("_")})
+
+                temp_file = dest_path.with_suffix(".json.tmp")
+                try:
+                    with open(temp_file, "w", encoding="utf-8") as f:
+                        json.dump(clean_group, f, indent=2, ensure_ascii=False)
+                        f.flush()
+                        os.fsync(f.fileno())
+                    temp_file.replace(dest_path)
+                except Exception:
+                    with open(dest_path, "w", encoding="utf-8") as f:
+                        json.dump(clean_group, f, indent=2, ensure_ascii=False)
+
             return True
-        except Exception:
-            try:
-                with open(MEETINGS_FILE, "w", encoding="utf-8") as f:
-                    json.dump(sorted_meetings, f, indent=2, ensure_ascii=False)
-                return True
-            except Exception:
-                return False
+        except Exception as e:
+            logging.error(f"[MEETINGS] Error saving month meetings: {e}")
+            return False
 
 
 def get_meetings_for_date(date_str: str) -> List[Dict[str, Any]]:
     """Returns meetings scheduled on a specific date, sorted chronologically by time."""
-    all_meetings = load_all_meetings()
+    try:
+        m_idx = int(date_str.split("-")[1])
+        all_meetings = load_all_meetings(target_month=m_idx)
+    except Exception:
+        all_meetings = load_all_meetings()
     day_meetings = [m for m in all_meetings if m.get("date") == date_str]
     return sort_meetings_by_datetime(day_meetings)
 
@@ -1253,7 +1338,7 @@ def ensure_month_scheduled(year: int, month: int, force: bool = False) -> List[D
         generate_week_schedule(week_start_date=mon_str, force=force)
 
     # 2. Re-load meetings and resolve OM & FM and Saturday timings
-    meetings = load_all_meetings()
+    meetings = load_all_meetings(target_month=month)
     month_prefix = f"{year:04d}-{month:02d}"
 
     # Determine designated assembly Saturday
@@ -1335,7 +1420,7 @@ def ensure_month_scheduled(year: int, month: int, force: bool = False) -> List[D
                 elif c == "VTS":
                     m["time"] = "11:00 AM - 01:00 PM"
 
-    save_all_meetings(cleaned_meetings)
+    save_all_meetings(cleaned_meetings, target_month=month)
     return cleaned_meetings
 
 
@@ -1348,7 +1433,7 @@ def get_month_meetings_breakdown(year: int, month: int) -> Dict[str, Any]:
     - All meetings list for the month
     """
     ensure_month_scheduled(year, month)
-    all_meetings = load_all_meetings()
+    all_meetings = load_all_meetings(target_month=month)
 
     month_prefix = f"{year:04d}-{month:02d}"
     month_meetings = [m for m in all_meetings if m.get("date", "").startswith(month_prefix)]

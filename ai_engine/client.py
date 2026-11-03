@@ -111,6 +111,43 @@ class OllamaClient:
                 "host": self.host
             }
 
+    def stream_generate(self, prompt: str, system_prompt: str = None, temperature: float = 0.3, timeout: int = 120):
+        """
+        Streams tokens from Ollama /api/generate.
+        Yields dict with: 'token', 'thinking', 'done'
+        """
+        payload = {
+            "model": self.model,
+            "prompt": prompt,
+            "stream": True,
+            "options": {
+                "temperature": temperature
+            }
+        }
+        if system_prompt:
+            payload["system"] = system_prompt
+
+        url = f"{self.host}/api/generate"
+        headers = self._get_headers()
+
+        req_data = json.dumps(payload).encode("utf-8")
+        req = urllib.request.Request(url, data=req_data, headers=headers)
+        with urllib.request.urlopen(req, timeout=timeout) as res:
+            for line in res:
+                line_str = line.decode("utf-8").strip()
+                if not line_str:
+                    continue
+                try:
+                    data = json.loads(line_str)
+                    yield {
+                        "token": data.get("response", ""),
+                        "thinking": data.get("thinking", ""),
+                        "done": data.get("done", False),
+                        "model": data.get("model", self.model)
+                    }
+                except Exception:
+                    continue
+
     def _get_headers(self) -> dict:
         headers = {
             "Content-Type": "application/json",

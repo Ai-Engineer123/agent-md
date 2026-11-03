@@ -13,7 +13,7 @@ if r"C:\coding\python-packages" not in sys.path:
 from fastapi import FastAPI, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
 from pathlib import Path
@@ -203,9 +203,170 @@ def generate_ai_summary_api(date: Optional[str] = None):
     target_dt = datetime.strptime(date, "%Y-%m-%d") if date else None
     return generate_and_archive_summary(target_dt)
 
-
 # ---------------------------------------------------------------------------
-# EMAIL INTEGRATION ROUTES
+# MD EXECUTIVE NOTES & CONVERSATIONAL AI COMPANION ROUTES
+# ---------------------------------------------------------------------------
+
+class CreateSessionRequest(BaseModel):
+    id: Optional[str] = None
+    title: Optional[str] = "New Discussion"
+    category: Optional[str] = "General"
+
+class SessionMessageRequest(BaseModel):
+    message: str
+    chat_id: Optional[str] = None
+
+class CreateChatRequest(BaseModel):
+    title: Optional[str] = "New Chat"
+
+class UpdateChatRequest(BaseModel):
+    title: str
+
+class SaveNoteRequest(BaseModel):
+    id: Optional[str] = None
+    title: Optional[str] = "Untitled Note"
+    category: Optional[str] = "General"
+    content: Optional[str] = ""
+    date: Optional[str] = None
+
+class MDChatRequest(BaseModel):
+    message: str
+    active_note_id: Optional[str] = None
+
+@app.get("/api/md-notes/sessions")
+def get_md_sessions_endpoint():
+    """Returns all Notes / Projects with their chat history pages."""
+    import md_notes_service as notes_svc
+    return {"success": True, "sessions": notes_svc.get_all_sessions()}
+
+@app.post("/api/md-notes/sessions")
+def create_or_update_session_endpoint(req: CreateSessionRequest):
+    """Creates a new Note or updates Note title."""
+    import md_notes_service as notes_svc
+    if req.id:
+        updated = notes_svc.update_session_meta(req.id, title=req.title, category=req.category)
+        return {"success": True, "session": updated, "sessions": notes_svc.get_all_sessions()}
+    created = notes_svc.create_session(title=req.title or "New Note", category=req.category or "General")
+    return {"success": True, "session": created, "sessions": notes_svc.get_all_sessions()}
+
+@app.get("/api/md-notes/sessions/{session_id}")
+def get_md_session_detail_endpoint(session_id: str):
+    """Returns the full Note record with all its chat history pages and messages."""
+    import md_notes_service as notes_svc
+    session = notes_svc.get_session(session_id)
+    if not session:
+        raise HTTPException(status_code=404, detail="Note not found")
+    return {"success": True, "session": session}
+
+@app.post("/api/md-notes/sessions/{session_id}/chats")
+def create_chat_in_note_endpoint(session_id: str, req: CreateChatRequest):
+    """Creates a fresh chat history page inside the Note (ChatGPT Project concept)."""
+    import md_notes_service as notes_svc
+    new_chat = notes_svc.create_chat_in_note(session_id, title=req.title or "New Chat")
+    if not new_chat:
+        raise HTTPException(status_code=404, detail="Note not found")
+    return {
+        "success": True,
+        "chat": new_chat,
+        "session": notes_svc.get_session(session_id),
+        "sessions": notes_svc.get_all_sessions()
+    }
+
+@app.delete("/api/md-notes/sessions/{session_id}/chats/{chat_id}")
+def delete_chat_in_note_endpoint(session_id: str, chat_id: str):
+    """Deletes a chat history page inside the Note."""
+    import md_notes_service as notes_svc
+    ok = notes_svc.delete_chat_in_note(session_id, chat_id)
+    return {
+        "success": ok,
+        "session": notes_svc.get_session(session_id),
+        "sessions": notes_svc.get_all_sessions()
+    }
+
+@app.put("/api/md-notes/sessions/{session_id}/chats/{chat_id}")
+def update_chat_title_endpoint(session_id: str, chat_id: str, req: UpdateChatRequest):
+    """Renames a chat history page inside the Note."""
+    import md_notes_service as notes_svc
+    ok = notes_svc.update_chat_title(session_id, chat_id, title=req.title)
+    return {
+        "success": ok,
+        "session": notes_svc.get_session(session_id),
+        "sessions": notes_svc.get_all_sessions()
+    }
+
+@app.post("/api/md-notes/sessions/{session_id}/message")
+def send_message_to_session_endpoint(session_id: str, req: SessionMessageRequest):
+    """Sends a message to a specific chat page and gets AI response with cross-topic memory."""
+    import md_notes_service as notes_svc
+    res = notes_svc.send_message_to_session(session_id, req.message, chat_id=req.chat_id)
+    return res
+
+@app.post("/api/md-notes/sessions/{session_id}/stream")
+def stream_session_message_endpoint(session_id: str, req: SessionMessageRequest):
+    """Streams AI response token-by-token using Server-Sent Events (SSE) into a chat page."""
+    import md_notes_service as notes_svc
+    return StreamingResponse(
+        notes_svc.stream_message_to_session(session_id, req.message, chat_id=req.chat_id),
+        media_type="text/event-stream"
+    )
+
+@app.delete("/api/md-notes/sessions/{session_id}")
+def delete_md_session_endpoint(session_id: str):
+    """Deletes a Note and all its chat pages."""
+    import md_notes_service as notes_svc
+    ok = notes_svc.delete_session(session_id)
+    return {"success": ok, "sessions": notes_svc.get_all_sessions()}
+
+@app.get("/api/md-notes")
+def get_md_notes_endpoint():
+    """Returns all MD saved notes from local persistent store."""
+    import md_notes_service as notes_svc
+    return {"success": True, "notes": notes_svc.get_all_notes()}
+
+@app.post("/api/md-notes")
+def save_md_note_endpoint(req: SaveNoteRequest):
+    """Saves or updates an MD note."""
+    import md_notes_service as notes_svc
+    saved = notes_svc.save_note(req.dict())
+    return {"success": True, "note": saved, "notes": notes_svc.get_all_notes()}
+
+@app.delete("/api/md-notes/{note_id}")
+def delete_md_note_endpoint(note_id: str):
+    """Deletes an MD note."""
+    import md_notes_service as notes_svc
+    ok = notes_svc.delete_note(note_id)
+    return {"success": ok, "notes": notes_svc.get_all_notes()}
+
+@app.get("/api/md-notes/chat")
+def get_md_chat_history_endpoint(limit: Optional[int] = 50):
+    """Returns conversation history between MD and Executive AI Companion."""
+    import md_notes_service as notes_svc
+    return {"success": True, "messages": notes_svc.get_chat_history(limit=limit)}
+
+@app.post("/api/md-notes/chat")
+def send_md_chat_message_endpoint(req: MDChatRequest):
+    """Sends a message to the Executive AI Companion with note & long-term memory context."""
+    import md_notes_service as notes_svc
+    res = notes_svc.chat_with_md_companion(req.message, active_note_id=req.active_note_id)
+    return res
+
+@app.post("/api/md-notes/chat/stream")
+def stream_md_chat_endpoint(req: MDChatRequest):
+    """Streams response to the Executive AI Companion with note & long-term memory context."""
+    import md_notes_service as notes_svc
+    session_id = req.active_note_id or (notes_svc.get_all_sessions()[0]["id"] if notes_svc.get_all_sessions() else "topic_welcome")
+    return StreamingResponse(
+        notes_svc.stream_message_to_session(session_id, req.message),
+        media_type="text/event-stream"
+    )
+
+@app.post("/api/md-notes/chat/clear")
+def clear_md_chat_endpoint():
+    """Resets conversation history to initial welcome message."""
+    import md_notes_service as notes_svc
+    ok = notes_svc.clear_chat_history()
+    return {"success": ok, "messages": notes_svc.get_chat_history()}
+
 # ---------------------------------------------------------------------------
 class EmailSendRequest(BaseModel):
     to_email: Optional[str] = None

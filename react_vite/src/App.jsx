@@ -19,10 +19,11 @@ import { MeetingsPage } from './components/MeetingsPage';
 import { CalendarPage } from './components/CalendarPage';
 import { DayDossierPage } from './components/DayDossierPage';
 import { MDNotesPage } from './components/MDNotesPage';
+import { CompanyDataAIPage } from './components/CompanyDataAIPage';
 import { playMechanicalClick, playHoverServo, playSuccessChime } from './audio/soundEffects';
 
 export default function App() {
-  const VALID_VIEWS = ['welcome', 'command_deck', 'checklist', 'audit', 'meetings', 'meeting_desk', 'calendar', 'day_dossier', 'notes'];
+  const VALID_VIEWS = ['welcome', 'command_deck', 'checklist', 'audit', 'meetings', 'meeting_desk', 'calendar', 'day_dossier', 'notes', 'company_data_ai'];
 
   // Restore current view on refresh from hash or localStorage
   const getInitialView = () => {
@@ -380,6 +381,21 @@ export default function App() {
         currentUser={currentUser}
         onLogout={handleLogout}
         onBack={() => navigateBack('command_deck')}
+        currentTime={currentTime}
+        onOpenCompanyDataAI={() => navigateTo('company_data_ai')}
+      />
+    );
+  }
+
+  // If in Company Data AI view, render the dedicated CompanyDataAIPage
+  if (currentView === 'company_data_ai') {
+    return (
+      <CompanyDataAIPage
+        currentUser={currentUser}
+        onLogout={handleLogout}
+        onBack={() => navigateBack('notes')}
+        onOpenNotes={() => navigateTo('notes')}
+        onBackToCommandDeck={() => navigateTo('command_deck')}
         currentTime={currentTime}
       />
     );
